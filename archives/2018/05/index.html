@@ -10,7 +10,7 @@
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" >
     <meta name="description" content="">
-    <title>Node.js学习之Buffer · mwindson&#39;s World</title>
+    <title>mwindson&#39;s World</title>
     <style type="text/css">
     @font-face {
         font-family: 'Oswald-Regular';
@@ -65,8 +65,6 @@
 
     <link rel="preload" href= /css/style.css?v=20180317 as="style" onload="this.onload=null;this.rel='stylesheet'">
     <link rel="stylesheet" type="text/css" href= /css/mobile.css?v=20180317 media="(max-width: 980px)"/>
-    
-    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
         
     <link rel="icon" href= /assets/favicon.ico>
     <script>
@@ -177,23 +175,12 @@
 </head>
 
     
-        <body class="post-body">
-    
     
 <header class="header">
 
     <div class="read-progress"></div>
     <div class="header-sidebar-menu">&#xe775;</div>
     <!-- post页的toggle banner  -->
-    
-    <div class="banner">
-            <div class="blog-title">
-                <a href="/" >mwindson&#39;s World</a>
-            </div>
-            <div class="post-title">
-                <a href="#" class="post-name">Node.js学习之Buffer</a>
-            </div>
-    </div>
     
     <a class="home-link" href=/>mwindson's World</a>
 </header>
@@ -207,66 +194,24 @@
 
 
 
-height:35vh;
-
 >
     
     <!-- 主页  -->
-    
-    
-    <!-- 404页  -->
             
-    <div class="site-intro-img" style="background-image: url(/intro/post-bg.jpg)"></div>
+    <div class="site-intro-img" style="background-image: url(/)"></div>
     <div class="site-intro-placeholder"></div>
     <div class="site-intro-meta">
         <!-- 标题  -->
         <h1 class="intro-title">
             <!-- 主页  -->
             
-            Node.js学习之Buffer
-            <!-- 404 -->
-            
         </h1>
         <!-- 副标题 -->
         <p class="intro-subtitle">
             <!-- 主页副标题  -->
             
-            
-            <!-- 404 -->
-            
         </p>
         <!-- 文章页meta -->
-        
-            <!-- 文章页标签  -->
-            
-                <div class= post-intro-tags >
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags = "js">js</a>
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags = "node">node</a>
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags = "前端">前端</a>
-    
-</div>
-            
-            <div class="post-intro-meta">
-                <span class="post-intro-calander iconfont-archer">&#xe676;</span>
-                <span class="post-intro-time">2018/04/22</span>
-                
-                <span class="shareWrapper">
-                    <span class="iconfont-archer shareIcon">&#xe71d;</span>
-                    <span class="shareText">Share</span>
-                    <ul class="shareList">
-                        <li class="iconfont-archer share-qr" data-type="qr">&#xe75b;
-                            <div class="share-qrcode"></div>
-                        </li>
-                        <li class="iconfont-archer" data-type="weibo">&#xe619;</li>
-                        <li class="iconfont-archer" data-type="qzone">&#xe62e;</li>
-                        <li class="iconfont-archer" data-type="twitter">&#xe634;</li>
-                        <li class="iconfont-archer" data-type="facebook">&#xe67a;</li>
-                    </ul>
-                </span>
-            </div>
         
     </div>
 </div>
@@ -350,84 +295,40 @@ height:35vh;
 </script>        
         <img class="loading" src="/assets/loading.svg" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" />
         <div class="container container-unloaded">
-            <main class="main post-page">
-    <article class="article-entry">
-        <h2 id="Buffer概述"><a href="#Buffer概述" class="headerlink" title="Buffer概述"></a>Buffer概述</h2><p><code>Buffer</code>类用于在 TCP 流或文件系统操作等场景中处理二进制数据流。其大小会在创建时确定，无法调整。</p>
-<h2 id="创建Buffer"><a href="#创建Buffer" class="headerlink" title="创建Buffer"></a>创建Buffer</h2><p>在V6之后的Node.js中，原有的<code>new Buffer</code>创建方法由于不可靠和不安全，已经被废弃。现有常用的Buffer创建办法包括：</p>
-<ul>
-<li><code>Buffer.from()</code></li>
-<li><code>Buffer.alloc()</code></li>
-<li><code>Buffer.allocUnsafe()</code> </li>
-</ul>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// buf1:  &lt;Buffer 00 00 00 00 00 00 00 00 00 00&gt;</span></span><br><span class="line"><span class="keyword">const</span> buf1 = Buffer.alloc(<span class="number">10</span>)</span><br><span class="line"><span class="comment">// buf2:  &lt;Buffer 01 01 01 01 01 01 01 01 01 01&gt;</span></span><br><span class="line"><span class="keyword">const</span> buf2 = Buffer.alloc(<span class="number">10</span>, <span class="number">1</span>)</span><br><span class="line"><span class="comment">// buf3  &lt;Buffer 01 02 03 04&gt;</span></span><br><span class="line"><span class="keyword">const</span> buf3 = Buffer.from([<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>])</span><br><span class="line"><span class="comment">// buf4  &lt;Buffer 74 65 73 74&gt;</span></span><br><span class="line"><span class="keyword">const</span> buf4 = Buffer.from(<span class="string">'test'</span>)</span><br><span class="line"><span class="comment">// 由于allocUnsafe方法会导致Buffer含有旧数据，因此结果不确定</span></span><br><span class="line"><span class="comment">// 内容必须被初始化，用buf.fill()来初始化</span></span><br><span class="line"><span class="keyword">const</span> buf5 = Buffer.allocUnsafe(<span class="number">10</span>)</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p><code>Buffer.allocUnsafe()</code> 速度快，但不安全</p>
-</blockquote>
-<blockquote>
-<p>当使用 <code>Buffer.allocUnsafe()</code> 分配新建的 Buffer 时，当分配的内存小于 4KB 时，默认会从一个单一的预分配的 Buffer 切割出来。 这使得应用程序可以避免垃圾回收机制因创建太多独立分配的 Buffer。</p>
-</blockquote>
-<h2 id="编码"><a href="#编码" class="headerlink" title="编码"></a>编码</h2><p>Node.js 目前支持的字符编码包括：</p>
-<ul>
-<li>‘ascii’ - 仅支持 7 位 ASCII 数据。如果设置去掉高位的话，这种编码是非常快的。</li>
-<li>‘utf8’ - 多字节编码的 Unicode 字符。许多网页和其他文档格式都使用 UTF-8 。</li>
-<li>‘utf16le’ - 2 或 4 个字节，小字节序编码的 Unicode 字符。支持代理对（U+10000 至 U+10FFFF）。</li>
-<li>‘ucs2’ - ‘utf16le’ 的别名。</li>
-<li>‘base64’ - Base64 编码。</li>
-<li>‘latin1’ - 一种把 Buffer 编码成一字节编码的字符串的方式</li>
-<li>‘binary’ - ‘latin1’ 的别名。</li>
-<li>‘hex’ - 将每个字节编码为两个十六进制字符。</li>
-</ul>
-<p>字符串进行编码的方式有两种：</p>
-<ul>
-<li><p>通过<code>Buffer.from(string[, encoding])</code>进行</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// buf6  &lt;Buffer 74 65 73 74&gt;</span></span><br><span class="line"><span class="keyword">const</span> buf6 = Buffer.from(<span class="string">'test'</span>, <span class="string">'ascii'</span>)</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>通过<code>buf.toString([encoding[, start[, end]]])</code>进行</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> buf6 = Buffer.from(<span class="string">'test'</span>)</span><br><span class="line"><span class="comment">// 74657374</span></span><br><span class="line">buf6.toString(<span class="string">'hex'</span>)</span><br></pre></td></tr></table></figure>
-</li>
-</ul>
-<h2 id="其他类方法"><a href="#其他类方法" class="headerlink" title="其他类方法"></a>其他类方法</h2><p>还有一些 <code>Buffer</code> 常用的 API</p>
-<ul>
-<li><code>Buffer.isBuffer</code>：判断对象是否为 Buffer</li>
-<li><code>Buffer.isEncoding</code>：判断 Buffer 对象编码</li>
-</ul>
-<h2 id="实例方法"><a href="#实例方法" class="headerlink" title="实例方法"></a>实例方法</h2><p><code>Buffer</code>实例的API和数组有些相似，包括:</p>
-<ul>
-<li><code>buf.length</code>：返回 内存为此 Buffer 实例所申请的字节数，并不是 Buffer 实例内容的字节数</li>
-<li><code>buf.indexOf</code>：和数组的 indexOf 类似，返回某字符串、acsii 码或者 buf 在改 buf 中的位置</li>
-<li><code>buf.copy</code>：将一个 buf 的（部分）内容复制到另外一个 buf 中</li>
-<li><code>buf.equals</code>:如果 buf 与 otherBuffer 具有完全相同的字节，则返回 true，否则返回 false</li>
-<li><p><code>buf.toJSON</code>：将buf转换成JSON格式的数据</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> buf6 = Buffer.from(<span class="string">'test'</span>)</span><br><span class="line"><span class="built_in">console</span>.log(buf6.toJSON())</span><br><span class="line"><span class="comment">// 输出 &#123; type: 'Buffer', data: [ 116, 101, 115, 116 ] &#125;</span></span><br></pre></td></tr></table></figure>
-</li>
-<li><p>一些指定字节格式读写的API</p>
-</li>
-</ul>
-<p>另外，<code>Buffer</code>实例可以用<code>for..of</code>进行遍历。当然，也存在<code>buf.values()</code> 、<code>buf.keys()</code> 和 <code>buf.entries()</code> 方法</p>
-
-    </article>
-    <!-- 前后页  -->
-    <ul class="post-paginator">
-        <li class="next">
-            
-        </li>
-        <li class="previous">
-            
-        </li>
-    </ul>
-    <!-- 评论插件 -->
-    <!-- 来必力City版安装代码 -->
-
-<!-- City版安装代码已完成 -->
+            <main class="main index-page">
     
     
-    <!--PC版-->
-
-    <!--PC版-->
-
-
     
-    <!-- 评论 -->
+        <article class="index-post">
+            <a class="abstract-title" href = "/2018/05/21/Node-js笔记之cluster/" >
+                
+                    <span>Node.js笔记之cluster</span>
+            </a>
+            <div class="abstract-content">
+                由于单个 Node 进程在运行时只能使用其中一个内核，因此简单的 Node 程序无法充分利用多核 CPU。为了解决这个问题，Node 提供了 cluster(集群)API。
+cluster 概述cluster提供了简单的创建共享服务器端口的子进程。
+12345678910111213141516171819const cluster = require('cluster')const http = require('http')const numCPUs = require('os').cpus().lengthif (cluster.isMaster) &#123;  console....
+            </div>
+            <div class="abstract-post-meta">
+                <!-- date  -->
+                <div class="abstract-date">
+                    <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2018/05/21</span>
+                </div>
+                <!-- tags  -->
+                
+                <div class= abstract-tags >
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = "js">js</a>
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = "node">node</a>
+    
+</div>
+                
+            </div>
+        </article>
+    
+    <!-- paginator  -->
+    
 </main>
             <!-- profile -->
             
@@ -489,24 +390,6 @@ height:35vh;
     </div>
     <!-- toc -->
     
-    <div class="toc-wrapper" style=
-    
-
-
-
-
-
-
-
-top:35vh;
-
-    >
-        <div class="toc-catalog">
-            <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
-        </div>
-        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Buffer概述"><span class="toc-number">1.</span> <span class="toc-text">Buffer概述</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#创建Buffer"><span class="toc-number">2.</span> <span class="toc-text">创建Buffer</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#编码"><span class="toc-number">3.</span> <span class="toc-text">编码</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#其他类方法"><span class="toc-number">4.</span> <span class="toc-text">其他类方法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#实例方法"><span class="toc-number">5.</span> <span class="toc-text">实例方法</span></a></li></ol>
-    </div>
-    
     <div class="back-top iconfont-archer">&#xe639;</div>
     <div class="sidebar sidebar-hide">
     <ul class="sidebar-tabs sidebar-tabs-active-0">
@@ -528,7 +411,14 @@ top:35vh;
     
     
     
-    <div class="total-archive"> Total : 1 </div>
+    
+    
+    
+    
+    
+    
+    
+    <div class="total-archive"> Total : 2 </div>
     
     <div class="post-archive">
     
@@ -540,7 +430,12 @@ top:35vh;
     
     
         <li class="archive-post-item">
-            <span class="archive-post-date">04/22</span><a class="archive-post-title" href= "/2018/04/22/Node-js学习之Buffer/" >Node.js学习之Buffer</a>
+            <span class="archive-post-date">05/21</span><a class="archive-post-title" href= "/2018/05/21/Node-js笔记之cluster/" >Node.js笔记之cluster</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/22</span><a class="archive-post-title" href= "/2018/04/22/Node-js笔记之Buffer/" >Node.js笔记之Buffer</a>
         </li>
     
     </div>
@@ -552,7 +447,11 @@ top:35vh;
     
         <span class="sidebar-tag-name" data-tags="node"><span class="iconfont-archer">&#xe606;</span>node</span>
     
-        <span class="sidebar-tag-name" data-tags="前端"><span class="iconfont-archer">&#xe606;</span>前端</span>
+        <span class="sidebar-tag-name" data-tags="游戏"><span class="iconfont-archer">&#xe606;</span>游戏</span>
+    
+        <span class="sidebar-tag-name" data-tags="PS4"><span class="iconfont-archer">&#xe606;</span>PS4</span>
+    
+        <span class="sidebar-tag-name" data-tags="战神"><span class="iconfont-archer">&#xe606;</span>战神</span>
     
     </div>
     <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>
@@ -605,8 +504,6 @@ jsonContent:
     
     </div>
     <!-- async load share.js -->
-    
-        <script src="/scripts/share.js" async></script>    
     
     </body>
 </html>
