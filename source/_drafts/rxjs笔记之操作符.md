@@ -69,7 +69,11 @@ exhaust 产生的流只有当上游流且**最新**订阅的内部流结束时�
 
 ### filter
 
+`filter`即只吐出上游流符合判定函数的数据
+
 ### first
+
+`first`接受三个参数——判定函数、结果处理函数和默认值（默认为null）。当上游数据符合判定函数时，`first`吐出经结果处理函数处理之后的数据并结束，无需等上游流结束，若等到上游流结束时，仍没有符合条件的数据，那么会吐出经过处理的默认值并结束。
 
 ### last
 
@@ -79,9 +83,35 @@ exhaust 产生的流只有当上游流且**最新**订阅的内部流结束时�
 
 ### take、tabkeLast、takeWhile 和 takeUntil
 
-`take`系列操作符用于取多个数据
+`take`系列操作符用于取多个数据，`take`和`takeLast`会在结束时一次性返回所有符合的数据，而`takeWhile`和`takeUntil`会随上游流的节奏吐出符合的数据。
+
 
 * `take` —— 相当于取多个数据的`first`
 * `takeLast` —— 相当于取多个的`last`
 * `takeWhile` —— `takeWhile`会一直吐出上游数据，直到**上游数据不满足判定函数**
-* `takeUntil` —— `takeUntil`
+* `takeUntil` —— `takeUntil`会一直吐出上游数据，直到**参数notifier流**吐出数据时，停止吐出数据。
+
+![takeUntil](./takeUntil.png)
+
+<center>takeUntil弹珠图</center>
+
+### skip、skipWhile和skipUntil
+
+`skip`表示跳过若干数据后，吐出和上游流一样的数据
+
+`skipWhile`与`takeWhile`、`skipUntil`与`skipUntil`一一对应
+
+## 控制操作符
+
+控制操作符主要是为了解决上下游速度不一致导致的`BackPressure`问题，对上游数据进行一定的舍弃，来实现**有损**的回压控制。
+
+每一类控制操作符默认用另一个流来控制，而简单的以时间做控制的操作符加上了Time后缀。
+
+### throttle、throtlleTime
+
+### debounce、debounceTime
+
+### audit、auditTime
+
+### sample、sampleTime
+
