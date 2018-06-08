@@ -73,7 +73,7 @@ exhaust 产生的流只有当上游流且**最新**订阅的内部流结束时�
 
 ### first
 
-`first`接受三个参数——判定函数、结果处理函数和默认值（默认为null）。当上游数据符合判定函数时，`first`吐出经结果处理函数处理之后的数据并结束，无需等上游流结束，若等到上游流结束时，仍没有符合条件的数据，那么会吐出经过处理的默认值并结束。
+`first`接受三个参数——判定函数、结果处理函数和默认值（默认为 null）。当上游数据符合判定函数时，`first`吐出经结果处理函数处理之后的数据并结束，无需等上游流结束，若等到上游流结束时，仍没有符合条件的数据，那么会吐出经过处理的默认值并结束。
 
 ### last
 
@@ -85,27 +85,26 @@ exhaust 产生的流只有当上游流且**最新**订阅的内部流结束时�
 
 `take`系列操作符用于取多个数据，`take`和`takeLast`会在结束时一次性返回所有符合的数据，而`takeWhile`和`takeUntil`会随上游流的节奏吐出符合的数据。
 
-
-* `take` —— 相当于取多个数据的`first`
-* `takeLast` —— 相当于取多个的`last`
-* `takeWhile` —— `takeWhile`会一直吐出上游数据，直到**上游数据不满足判定函数**
-* `takeUntil` —— `takeUntil`会一直吐出上游数据，直到**参数notifier流**吐出数据时，停止吐出数据。
+- `take` —— 相当于取多个数据的`first`
+- `takeLast` —— 相当于取多个的`last`
+- `takeWhile` —— `takeWhile`会一直吐出上游数据，直到**上游数据不满足判定函数**
+- `takeUntil` —— `takeUntil`会一直吐出上游数据，直到**参数 notifier 流**吐出数据时，停止吐出数据。
 
 ![takeUntil](./takeUntil.png)
 
 <center>takeUntil弹珠图</center>
 
-### skip、skipWhile和skipUntil
+### skip、skipWhile 和 skipUntil
 
 `skip`表示跳过若干数据后，吐出和上游流一样的数据
 
 `skipWhile`与`takeWhile`、`skipUntil`与`skipUntil`一一对应
 
-## 控制操作符
+## 控制类操作符
 
 控制操作符主要是为了解决上下游速度不一致导致的`BackPressure`问题，对上游数据进行一定的舍弃，来实现**有损**的回压控制。
 
-每一类控制操作符默认用另一个流来控制，而简单的以时间做控制的操作符加上了Time后缀。
+每一类控制操作符默认用另一个流来控制，而简单的以时间做控制的操作符加上了 Time 后缀。
 
 ### throttle、throtlleTime
 
@@ -115,3 +114,57 @@ exhaust 产生的流只有当上游流且**最新**订阅的内部流结束时�
 
 ### sample、sampleTime
 
+## 转化类操作符
+
+转化类操作符会对数据进行处理，但转化类操作符不会对数据进行过滤，会对数据进行转化和组合。
+
+### map、mapTo、pluck
+
+`map`是最简单、最常用的转化操作符。`map`会对上游数据进行函数处理，并把返回结果传给下游流。
+
+`mapTo`会把所有数据映射成同一个数据，并传给下游。
+
+`pluck`类似根据传入参数 key 来取上游数据中对应 key 的值，并传给下游。`plunk`只能去一个值，而不能嵌套取值。当对应 key 不存在时，`pluck`可以把传入的第二个参数作为默认值（默认为 undefined）传给下游。
+
+### 缓存数组类和缓存 Observable 类
+
+和控制类操作符实现的有损回压控制不同，转化类操作符不会舍弃上游的数据。它会通过将多个数据放在一个数组和 Observable 对象并且一次性传给下游，从而实现**无损**的回压控制。因此可以把这类操作符分为缓存数组类和缓存 Observable 类，两者的区别只在于传给下游流的数据形式。
+
+- 缓存数组类 bufferTime、bufferCount、bufferWhen、bufferToggle、buffer
+- 缓存 Observable 类 windowTime、windowCount、windowWhen、windowToggle、window
+
+#### bufferTime 和 windowTime
+
+`bufferTime`和`windowTime`接受三个参数。第一个参数是区间时间长度，操作符会将下游划分为该时间长度的时间区间，并对这段时间内的数据进行分组，以数组形式或内部流的形式传给下游。
+
+```javascript
+let s1$ = Rx.Observable.timer(0, 200)
+  .take(3)
+  .concat(Rx.Observable.timer(500, 300).take(4))
+  .concat(Rx.Observable.interval(500).take(4))
+
+let s2$ = s1$.bufferTime(1200)
+let s3$ = s1$.windowTime(1200)
+```
+
+![bufferTime和windowTime](./bufferTime和windowTime.png)
+
+这两个操作符的第二个参数表示每个时间区间开始的时间间隔。因此当第二个参数小于第一个参数时，时间区间会重叠，可能会导致重复的数据，而第二个参数大于第二个参数时，时间区间产生间距，可能会导致数据丢失。
+
+第三个参数表示该区间内最多数据个数。
+
+因此，`windowTime`产生的内部流会持续一段时间，并在**持续时间等于时间区间或达到区间数据上限**时结束，而`bufferTime`会在**区间时间结束或达到区间数据上限**时将数据数组传给下游。
+
+#### bufferCount 和 windowCount
+
+`windowCount`、`bufferCount`和`windowTime`、`bufferTime`类似，区间长度由数据个数决定，根据接受的数据个数来决定数组传给下游或内部流结束的时间。第二个参数表示每隔多少个数据产生区间，因此也会产生丢弃数据和数据重复的现象。
+
+#### bufferWhen 和 windowWhen
+
+同样的，`bufferWhen`和`windowWhen`会根据传入函数返回的 Observable 对象来划分区间，当返回的流**产生数据或完结**时，操作符会将数据数组传给下游或者结束内部流，产生新的内部流。
+
+> `bufferWhen`和`windowWhen`没有其他参数。
+
+#### bufferToggle 和 windowToggle
+
+`windowToggle`、`bufferToggle`
