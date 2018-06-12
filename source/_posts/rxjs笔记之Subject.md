@@ -91,7 +91,84 @@ const hotSource$ = coldSource$.multicast(new Subject())
 
 3.  selector 参数
 
-    [todo]
+    `selector`接受一个`shared`参数，代表`multicast`接受的`Subject`对象。`selector`函数可以对`shared`进行一些流的操作，并返回一个新的数据流。
+    `selecotr`可以多次使用上游数据，但不会重复订阅上游的数据。
+
+    当数据流出现三角依赖时，这时会发生**重复订阅**的问题
+
+    ```javascript
+    // delayedTick$ 依赖 tick$，而mergedTick$同时依赖delayedTick$和tick$
+    // 本质上，mergedTick$只取决于tick$，应该订阅tick$一次而不是两次
+    const cold$ = interval(1000).pipe(
+      take(3),
+      tap(x => console.log('source ', x))
+    )
+    const tick$ = cold$
+    const delayedTick$ = tick$.pipe(delay(500))
+    const mergedTick$ = merge(delayedTick$, tick$)
+    // 发生了两次订阅
+    mergedTick$.subscribe(value => console.log('observer :', value))
+    // source 0
+    // source 0
+    // observer :0
+    // observer :0
+    // source 1
+    // source 1
+    // observer :1
+    // observer :1
+    ```
+
+    这时如果使用`selector`参数，就可以避免重复订阅的问题.
+
+    ```javascript
+    const cold$ = interval(1000).pipe(
+      take(2),
+      tap(x => console.log('source ', x))
+    )
+    const result$ = cold$.pipe(
+      multicast(new Subject(), shared => {
+        const tick$ = shared
+        const delayedTick$ = tick$.pipe(delay(500))
+        return merge(delayedTick$, tick$)
+      })
+    )
+    result$.subscribe(value => console.log('observer :', value))
+    ```
+
+    这时候就上游源只会吐出一次
+
+    ```
+    source 0
+    observer :0
+    observer :0
+    source 1
+    observer :1
+    observer :1
+    ```
+
+#### publish
+
+`publish`有一个可选`selector`参数。如果没有传入`selector`，那么等价于
+
+```javascript
+multicast(new Subject())
+```
+
+反之,则等价于
+
+```javascript
+multicast(() => new Subject(), selector)
+```
+
+#### share
+
+`share`等价于调用参数为 Subject 工厂函数的`multicast`，再调用`refCount`。
+
+```javascript
+cold$.share()
+// 等价于
+cold$.multicast(() => new Subject()).refCount()
+```
 
 ### 高级 Subject
 
@@ -107,8 +184,9 @@ const hotSource$ = coldSource$.multicast(new Subject())
 
 `publishReplay`会存储部分 Replay 的数据，并把这些数据一次性传递给接下来的订阅者。
 
+> 注意限制缓存大小，防止内存出错。
+
 ```javascript
-// rxjs v6将链式调用改为传入pipe
 let cold$ = interval(1000).pipe(take(4))
 // replay 最新的两个数据
 let hot$ = cold$.pipe(
@@ -140,4 +218,10 @@ setTimeout(() => {
 // observer 4: 3
 ```
 
-#### publishBehavior
+#### publishBehavior 和 BehaviorSubject
+
+`publishBehavior`可以指定一个默认值。这个默认值一开始是传入的参数，后会被上游的最新数据替代。
+
+当`Observer`订阅时，上游流会先把“默认数据”传递给`Observer`，然后再传递流中的数据。
+
+> 若上游 Subject 已完结，新的`Observer`不会接受任何数据，包括默认数据。
