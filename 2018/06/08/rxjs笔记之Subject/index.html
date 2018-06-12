@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html>
+    <!-- title -->
+
+
+
+
+
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" >
+    <meta name="description" content="">
+    <title>rxjs笔记之Subject · mwindson&#39;s World</title>
+    <style type="text/css">
+    @font-face {
+        font-family: 'Oswald-Regular';
+        src: url("/font/Oswald-Regular.ttf");
+    }
+
+    body {
+        margin: 0;
+    }
+
+    header,
+    footer,
+    .back-top,
+    .sidebar,
+    .container,
+    .site-intro-meta,
+    .toc-wrapper {
+        display: none;
+    }
+
+    .site-intro {
+        position: relative;
+        z-index: 3;
+        width: 100%;
+        /* height: 50vh; */
+        overflow: hidden;
+    }
+
+    .site-intro-placeholder {
+        position: absolute;
+        z-index: -2;
+        top: 0;
+        left: 0;
+        width: calc(100% + 300px);
+        height: 100%;
+        background: repeating-linear-gradient(-45deg, #444 0, #444 80px, #333 80px, #333 160px);
+        background-position: center center;
+        transform: translate3d(-226px, 0, 0);
+        animation: gradient-move 2.5s ease-out 0s 1;
+    }
+
+    @keyframes gradient-move {
+        0% {
+            transform: translate3d(-226px, 0, 0);
+        }
+        100% {
+            transform: translate3d(0, 0, 0);
+        }
+    }
+
+</style>
+
+    <link rel="preload" href= /css/style.css?v=20180317 as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="stylesheet" type="text/css" href= /css/mobile.css?v=20180317 media="(max-width: 980px)"/>
+    
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+        
+    <link rel="icon" href= /assets/favicon.ico>
+    <script>
+        (function (w) {
+            "use strict";
+            // rel=preload support test
+            if (!w.loadCSS) {
+                w.loadCSS = function () { };
+            }
+            // define on the loadCSS obj
+            var rp = loadCSS.relpreload = {};
+            // rel=preload feature support test
+            // runs once and returns a function for compat purposes
+            rp.support = (function () {
+                var ret;
+                try {
+                    ret = w.document.createElement("link").relList.supports("preload");
+                } catch (e) {
+                    ret = false;
+                }
+                return function () {
+                    return ret;
+                };
+            })();
+
+            // if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+            // then change that media back to its intended value on load
+            rp.bindMediaToggle = function (link) {
+                // remember existing media attr for ultimate state, or default to 'all'
+                var finalMedia = link.media || "all";
+
+                function enableStylesheet() {
+                    link.media = finalMedia;
+                }
+
+                // bind load handlers to enable media
+                if (link.addEventListener) {
+                    link.addEventListener("load", enableStylesheet);
+                } else if (link.attachEvent) {
+                    link.attachEvent("onload", enableStylesheet);
+                }
+
+                // Set rel and non-applicable media type to start an async request
+                // note: timeout allows this to happen async to let rendering continue in IE
+                setTimeout(function () {
+                    link.rel = "stylesheet";
+                    link.media = "only x";
+                });
+                // also enable media after 3 seconds,
+                // which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+                setTimeout(enableStylesheet, 3000);
+            };
+
+            // loop through link elements in DOM
+            rp.poly = function () {
+                // double check this to prevent external calls from running
+                if (rp.support()) {
+                    return;
+                }
+                var links = w.document.getElementsByTagName("link");
+                for (var i = 0; i < links.length; i++) {
+                    var link = links[i];
+                    // qualify links to those with rel=preload and as=style attrs
+                    if (link.rel === "preload" && link.getAttribute("as") === "style" && !link.getAttribute("data-loadcss")) {
+                        // prevent rerunning on link
+                        link.setAttribute("data-loadcss", true);
+                        // bind listeners to toggle media back
+                        rp.bindMediaToggle(link);
+                    }
+                }
+            };
+
+            // if unsupported, run the polyfill
+            if (!rp.support()) {
+                // run once at least
+                rp.poly();
+
+                // rerun poly on an interval until onload
+                var run = w.setInterval(rp.poly, 500);
+                if (w.addEventListener) {
+                    w.addEventListener("load", function () {
+                        rp.poly();
+                        w.clearInterval(run);
+                    });
+                } else if (w.attachEvent) {
+                    w.attachEvent("onload", function () {
+                        rp.poly();
+                        w.clearInterval(run);
+                    });
+                }
+            }
+            // commonjs
+            if (typeof exports !== "undefined") {
+                exports.loadCSS = loadCSS;
+            }
+            else {
+                w.loadCSS = loadCSS;
+            }
+        }(typeof global !== "undefined" ? global : this));
+    </script>
+    <script src="//cdn.staticfile.org/jquery/3.2.1/jquery.min.js" defer></script>
+    <script src="/scripts/main.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.js" defer></script>
+    <!-- 百度统计  -->
+    
+    <!-- 谷歌统计  -->
+    
+</head>
+
+    
+        <body class="post-body">
+    
+    
+<header class="header">
+
+    <div class="read-progress"></div>
+    <div class="header-sidebar-menu">&#xe775;</div>
+    <!-- post页的toggle banner  -->
+    
+    <div class="banner">
+            <div class="blog-title">
+                <a href="/" >mwindson&#39;s World</a>
+            </div>
+            <div class="post-title">
+                <a href="#" class="post-name">rxjs笔记之Subject</a>
+            </div>
+    </div>
+    
+    <a class="home-link" href=/>mwindson's World</a>
+</header>
+    <div class="wrapper">
+        <div class="site-intro" style=
+
+
+
+
+
+
+
+
+height:35vh;
+
+>
+    
+    <!-- 主页  -->
+    
+    
+    <!-- 404页  -->
+            
+    <div class="site-intro-img" style="background-image: url(/intro/post-bg.jpg)"></div>
+    <div class="site-intro-placeholder"></div>
+    <div class="site-intro-meta">
+        <!-- 标题  -->
+        <h1 class="intro-title">
+            <!-- 主页  -->
+            
+            rxjs笔记之Subject
+            <!-- 404 -->
+            
+        </h1>
+        <!-- 副标题 -->
+        <p class="intro-subtitle">
+            <!-- 主页副标题  -->
+            
+            
+            <!-- 404 -->
+            
+        </p>
+        <!-- 文章页meta -->
+        
+            <!-- 文章页标签  -->
+            
+                <div class= post-intro-tags >
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = "js">js</a>
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = "rxjs">rxjs</a>
+    
+</div>
+            
+            <div class="post-intro-meta">
+                <span class="post-intro-calander iconfont-archer">&#xe676;</span>
+                <span class="post-intro-time">2018/06/08</span>
+                
+                <span class="shareWrapper">
+                    <span class="iconfont-archer shareIcon">&#xe71d;</span>
+                    <span class="shareText">Share</span>
+                    <ul class="shareList">
+                        <li class="iconfont-archer share-qr" data-type="qr">&#xe75b;
+                            <div class="share-qrcode"></div>
+                        </li>
+                        <li class="iconfont-archer" data-type="weibo">&#xe619;</li>
+                        <li class="iconfont-archer" data-type="qzone">&#xe62e;</li>
+                        <li class="iconfont-archer" data-type="twitter">&#xe634;</li>
+                        <li class="iconfont-archer" data-type="facebook">&#xe67a;</li>
+                    </ul>
+                </span>
+            </div>
+        
+    </div>
+</div>
+        <script>
+  // load webfont-loader async, and add callback function
+  function async(u, c) {
+    var d = document, t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+    s.parentNode.insertBefore(o, s);
+  }
+  
+  // get user agent
+  var browser = {
+    versions: function () {
+      var u = window.navigator.userAgent;
+      return {
+        userAgent: u,
+        trident: u.indexOf('Trident') > -1, //IE内核
+        presto: u.indexOf('Presto') > -1, //opera内核
+        webKit: u.indexOf('AppleWebKit') > -1, //苹果、谷歌内核
+        gecko: u.indexOf('Gecko') > -1 && u.indexOf('KHTML') == -1, //火狐内核
+        mobile: !!u.match(/AppleWebKit.*Mobile.*/), //是否为移动终端
+        ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/), //ios终端
+        android: u.indexOf('Android') > -1 || u.indexOf('Linux') > -1, //android终端或者uc浏览器
+        iPhone: u.indexOf('iPhone') > -1 || u.indexOf('Mac') > -1, //是否为iPhone或者安卓QQ浏览器
+        iPad: u.indexOf('iPad') > -1, //是否为iPad
+        webApp: u.indexOf('Safari') == -1, //是否为web应用程序，没有头部与底部
+        weixin: u.indexOf('MicroMessenger') == -1, //是否为微信浏览器
+        uc: u.indexOf('UCBrowser') > -1 //是否为android下的UC浏览器
+      };
+    }()
+  }
+  console.log("userAgent:" + browser.versions.userAgent);
+
+  // callback
+  function fontLoaded() {
+    console.log('font loaded');
+    if (document.getElementsByClassName('site-intro-meta')) {
+      document.getElementsByClassName('intro-title')[0].classList.add('intro-fade-in');
+      document.getElementsByClassName('intro-subtitle')[0].classList.add('intro-fade-in');
+      var postIntroTags = document.getElementsByClassName('post-intro-tags')[0],
+        postIntroMeat = document.getElementsByClassName('post-intro-meta')[0];
+      if (postIntroTags) {
+        postIntroTags.classList.add('post-fade-in');
+      }
+      if (postIntroMeat) {
+        postIntroMeat.classList.add('post-fade-in');
+      }
+    }
+  }
+
+  // UC不支持跨域，所以直接显示
+  function asyncCb(){
+    if (browser.versions.uc) {
+      console.log("UCBrowser");
+      fontLoaded();
+    } else {
+      WebFont.load({
+        custom: {
+          families: ['Oswald-Regular']
+        },
+        loading: function () {  //所有字体开始加载
+          // console.log('loading');
+        },
+        active: function () {  //所有字体已渲染
+          fontLoaded();
+        },
+        inactive: function () { //字体预加载失败，无效字体或浏览器不支持加载
+          console.log('inactive: timeout');
+          fontLoaded();
+        },
+        timeout: 5000 // Set the timeout to two seconds
+      });
+    }
+  }
+
+  async("https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js", asyncCb)
+</script>        
+        <img class="loading" src="/assets/loading.svg" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" />
+        <div class="container container-unloaded">
+            <main class="main post-page">
+    <article class="article-entry">
+        <h2 id="Subject"><a href="#Subject" class="headerlink" title="Subject"></a>Subject</h2><h3 id="hot-流和-cold-流"><a href="#hot-流和-cold-流" class="headerlink" title="hot 流和 cold 流"></a>hot 流和 cold 流</h3><p><code>rxjs</code>中创建的数据流分为 hot 流和 cold 流。当 Observer 订阅数据流时，cold 流会从<strong>数据流的起始时间点</strong>吐出数据，而 hot 流会从<strong>订阅的时间点</strong>开始吐出数据。</p>
+<p>cold 流实现的是单播，hot 流实现的是多播。</p>
+<p>cold 流由<code>interval</code>、<code>range</code>、<code>of</code>等操作符创建。</p>
+<p>hot 流的创建操作符包括<code>fromPromise</code>、<code>fromEvent</code>、<code>fromEventPattern</code>。这些操作符数据来源于外部，如 Promise 或 Dom 事件。</p>
+<p>cold 流的数据在没有订阅者的情况下，数据都不会产生。可以认为，每个订阅者订阅的 cold 流是独立的数据流。</p>
+<p>hot 流的数据产生与订阅者无关，在没有订阅者的情况下，数据仍然会产生，不过不会传入管道。可以认为，每个订阅者订阅的 hot 流是同一数据流。</p>
+<h3 id="subject-扮演的角色"><a href="#subject-扮演的角色" class="headerlink" title="subject 扮演的角色"></a>subject 扮演的角色</h3><p><code>subject</code>是一个 Observable,也是一个 Observer。</p>
+<p><code>subject</code>通过<code>subject.next</code>方法向 subject 中传入数据。因此<code>subject</code>可以接受另一个<code>Observable</code>的数据。</p>
+<p><code>subject</code>能通过调用<code>subject.complete</code>来停止数据传递，进入结束状态。</p>
+<p><code>subjecet</code>可以保存多个订阅自己的 Observer 列表，而<code>Observable</code>没有状态，不能记忆多个订阅者。</p>
+<p>因此，<code>subject</code>可以通过接受一个 cold 流，并把流中的数据传递给多个订阅 <code>subject</code> 的订阅者，从而将一个 cold 流转化为一个 hot 流以实现多播。</p>
+<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="keyword">let</span> s1$ = Rx.Observable.interval(<span class="number">1000</span>).take(<span class="number">4</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> subject = <span class="keyword">new</span> Rx.Subject()</span><br><span class="line"></span><br><span class="line">s1$.subscribe(</span><br><span class="line">  value =&gt; &#123;</span><br><span class="line">    subject.next(value)</span><br><span class="line">  &#125;,</span><br><span class="line">  error =&gt; &#123;</span><br><span class="line">    subject.error(error)</span><br><span class="line">  &#125;,</span><br><span class="line">  () =&gt; &#123;</span><br><span class="line">    subject.complete()</span><br><span class="line">  &#125;</span><br><span class="line">)</span><br><span class="line"><span class="comment">// 简写</span></span><br><span class="line">s1$.subscribe(subject)</span><br></pre></td></tr></table></figure>
+<h3 id="多播操作符"><a href="#多播操作符" class="headerlink" title="多播操作符"></a>多播操作符</h3><h4 id="multicast"><a href="#multicast" class="headerlink" title="multicast"></a>multicast</h4><p><code>multicast</code>是一个实例操作符，它可以通过接受一个 <code>Subject</code> 对象，将上游 cold 流转化为 hot 流。</p>
+<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="keyword">const</span> hotSource$ = coldSource$.multicast(<span class="keyword">new</span> Subject())</span><br></pre></td></tr></table></figure>
+<ol>
+<li><p>connect</p>
+<p>当<code>Observer</code>去订阅上述代码返回的 hot 数据流时，<code>hotSource$</code>并不会吐出数据给订阅者。</p>
+<p>如果<code>multicast</code>操作符返回的是一个常规 hot 流，那么当无<code>Observer</code>订阅时，hot 流依然会吐出数据。为了防止数据丢失，Rxjs 使返回的 hot 流必须在调用<code>hotSource$.connect()</code>后，才会吐出数据并向订阅者传递。因此<code>connect</code>能够如闸门一样控制数据是否流出。</p>
+</li>
+<li><p>refCount</p>
+<p><code>refCount</code>能够实现一种功能：当有<code>Observer</code>订阅数 &gt; 1 时，<code>multicast</code>返回的 hot 流开始传递数据，而订阅数减少为 0 时，自动退订上游流。</p>
+<p>注意，如果要使用<code>refCount</code>，那么<code>multicast</code>需要接受返回一个<code>Subject</code>对象的函数作为参数。这是为了防止传入一个固定<code>Subject</code>对象后，一旦该<code>Subject</code>对象结束并不再接受数据，那么之后的<code>Observer</code>将不能获得数据。</p>
+<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="keyword">const</span> cold$ = Observable.interval(<span class="number">1000</span>).take(<span class="number">3</span>)</span><br><span class="line"><span class="comment">// fixed Subejct</span></span><br><span class="line"><span class="keyword">let</span> hot$ = cold$.multicast(<span class="keyword">new</span> Subject()).refCount()</span><br><span class="line"><span class="comment">// Subject function</span></span><br><span class="line">hot$ = cold$.multicast(<span class="function"><span class="params">()</span> =&gt;</span> <span class="keyword">new</span> Subject()).refCount()</span><br><span class="line"></span><br><span class="line">hot$.subscribe(<span class="function"><span class="params">value</span> =&gt;</span> <span class="built_in">console</span>.log(<span class="string">'Observer 1: '</span> + value))</span><br><span class="line">setTimeout(<span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">  hot$.subscribe(<span class="function"><span class="params">value</span> =&gt;</span> <span class="built_in">console</span>.log(<span class="string">'Observer 2: '</span> + value))</span><br><span class="line">&#125;, <span class="number">1500</span>)</span><br><span class="line">setTimeout(<span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">  hot$.subscribe(<span class="function"><span class="params">value</span> =&gt;</span> <span class="built_in">console</span>.log(<span class="string">'Observer 2: '</span> + value))</span><br><span class="line">&#125;, <span class="number">5000</span>)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>selector 参数</p>
+<p><code>selector</code>接受一个<code>shared</code>参数，代表<code>multicast</code>接受的<code>Subject</code>对象。<code>selector</code>函数可以对<code>shared</code>进行一些流的操作，并返回一个新的数据流。<br><code>selecotr</code>可以多次使用上游数据，但不会重复订阅上游的数据。</p>
+<p>当数据流出现三角依赖时，这时会发生<strong>重复订阅</strong>的问题</p>
+<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="comment">// delayedTick$ 依赖 tick$，而mergedTick$同时依赖delayedTick$和tick$</span></span><br><span class="line"><span class="comment">// 本质上，mergedTick$只取决于tick$，应该订阅tick$一次而不是两次</span></span><br><span class="line"><span class="keyword">const</span> cold$ = interval(<span class="number">1000</span>).pipe(</span><br><span class="line">  take(<span class="number">3</span>),</span><br><span class="line">  tap(<span class="function"><span class="params">x</span> =&gt;</span> <span class="built_in">console</span>.log(<span class="string">'source '</span>, x))</span><br><span class="line">)</span><br><span class="line"><span class="keyword">const</span> tick$ = cold$</span><br><span class="line"><span class="keyword">const</span> delayedTick$ = tick$.pipe(delay(<span class="number">500</span>))</span><br><span class="line"><span class="keyword">const</span> mergedTick$ = merge(delayedTick$, tick$)</span><br><span class="line"><span class="comment">// 发生了两次订阅</span></span><br><span class="line">mergedTick$.subscribe(<span class="function"><span class="params">value</span> =&gt;</span> <span class="built_in">console</span>.log(<span class="string">'observer :'</span>, value))</span><br><span class="line"><span class="comment">// source 0</span></span><br><span class="line"><span class="comment">// source 0</span></span><br><span class="line"><span class="comment">// observer :0</span></span><br><span class="line"><span class="comment">// observer :0</span></span><br><span class="line"><span class="comment">// source 1</span></span><br><span class="line"><span class="comment">// source 1</span></span><br><span class="line"><span class="comment">// observer :1</span></span><br><span class="line"><span class="comment">// observer :1</span></span><br></pre></td></tr></table></figure>
+<p>这时如果使用<code>selector</code>参数，就可以避免重复订阅的问题.</p>
+<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="keyword">const</span> cold$ = interval(<span class="number">1000</span>).pipe(</span><br><span class="line">  take(<span class="number">2</span>),</span><br><span class="line">  tap(<span class="function"><span class="params">x</span> =&gt;</span> <span class="built_in">console</span>.log(<span class="string">'source '</span>, x))</span><br><span class="line">)</span><br><span class="line"><span class="keyword">const</span> result$ = cold$.pipe(</span><br><span class="line">  multicast(<span class="keyword">new</span> Subject(), shared =&gt; &#123;</span><br><span class="line">    <span class="keyword">const</span> tick$ = shared</span><br><span class="line">    <span class="keyword">const</span> delayedTick$ = tick$.pipe(delay(<span class="number">500</span>))</span><br><span class="line">    <span class="keyword">return</span> merge(delayedTick$, tick$)</span><br><span class="line">  &#125;)</span><br><span class="line">)</span><br><span class="line">result$.subscribe(<span class="function"><span class="params">value</span> =&gt;</span> <span class="built_in">console</span>.log(<span class="string">'observer :'</span>, value))</span><br></pre></td></tr></table></figure>
+<p>这时候就上游源只会吐出一次</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">source 0</span><br><span class="line">observer :0</span><br><span class="line">observer :0</span><br><span class="line">source 1</span><br><span class="line">observer :1</span><br><span class="line">observer :1</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<h4 id="publish"><a href="#publish" class="headerlink" title="publish"></a>publish</h4><p><code>publish</code>有一个可选<code>selector</code>参数。如果没有传入<code>selector</code>，那么等价于</p>
+<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line">multicast(<span class="keyword">new</span> Subject())</span><br></pre></td></tr></table></figure>
+<p>反之,则等价于</p>
+<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line">multicast(<span class="function"><span class="params">()</span> =&gt;</span> <span class="keyword">new</span> Subject(), selector)</span><br></pre></td></tr></table></figure>
+<h4 id="share"><a href="#share" class="headerlink" title="share"></a>share</h4><p><code>share</code>等价于调用参数为 Subject 工厂函数的<code>multicast</code>，再调用<code>refCount</code>。</p>
+<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line">cold$.share()</span><br><span class="line"><span class="comment">// 等价于</span></span><br><span class="line">cold$.multicast(<span class="function"><span class="params">()</span> =&gt;</span> <span class="keyword">new</span> Subject()).refCount()</span><br></pre></td></tr></table></figure>
+<h3 id="高级-Subject"><a href="#高级-Subject" class="headerlink" title="高级 Subject"></a>高级 Subject</h3><h4 id="publishLast-和-AsyncSubject"><a href="#publishLast-和-AsyncSubject" class="headerlink" title="publishLast 和 AsyncSubject"></a>publishLast 和 AsyncSubject</h4><p><code>publishLast</code>只多播上游的最后一个数据，当上游的 cold 流完结时，才会把最后一个数据传递给订阅者。</p>
+<p><code>publishLast</code>返回的多播流是可重用的，即使内部的<code>AsyncSubject</code>结束，新的<code>Observer</code>依然可以获得最后一个数据。</p>
+<h4 id="publishReplay-和-ReplaySubject"><a href="#publishReplay-和-ReplaySubject" class="headerlink" title="publishReplay 和 ReplaySubject"></a>publishReplay 和 ReplaySubject</h4><p><code>publishReplay</code>接受两个参数：<code>bufferSize</code>和<code>windowTime</code>，分别代表 Replay 的数据个数和时间长度。</p>
+<p><code>publishReplay</code>会存储部分 Replay 的数据，并把这些数据一次性传递给接下来的订阅者。</p>
+<blockquote>
+<p>注意限制缓存大小，防止内存出错。</p>
+</blockquote>
+<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="keyword">let</span> cold$ = interval(<span class="number">1000</span>).pipe(take(<span class="number">4</span>))</span><br><span class="line"><span class="comment">// replay 最新的两个数据</span></span><br><span class="line"><span class="keyword">let</span> hot$ = cold$.pipe(</span><br><span class="line">  publishReplay(<span class="number">2</span>),</span><br><span class="line">  refCount()</span><br><span class="line">)</span><br><span class="line"><span class="comment">// 订阅</span></span><br><span class="line">hot$.subscribe(<span class="function"><span class="params">value</span> =&gt;</span> <span class="built_in">console</span>.log(<span class="string">'observer 1: '</span> + value))</span><br><span class="line">setTimeout(<span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">  hot$.subscribe(<span class="function"><span class="params">value</span> =&gt;</span> <span class="built_in">console</span>.log(<span class="string">'observer 2: '</span> + value))</span><br><span class="line">&#125;, <span class="number">3000</span>)</span><br><span class="line">setTimeout(<span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">  hot$.subscribe(<span class="function"><span class="params">value</span> =&gt;</span> <span class="built_in">console</span>.log(<span class="string">'observer 3: '</span> + value))</span><br><span class="line">&#125;, <span class="number">5000</span>)</span><br><span class="line">setTimeout(<span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">  hot$.subscribe(<span class="function"><span class="params">value</span> =&gt;</span> <span class="built_in">console</span>.log(<span class="string">'observer 4: '</span> + value))</span><br><span class="line">&#125;, <span class="number">6000</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">// observer 1: 0</span></span><br><span class="line"><span class="comment">// observer 1: 1</span></span><br><span class="line"><span class="comment">// observer 1: 2</span></span><br><span class="line"><span class="comment">// observer 2: 1</span></span><br><span class="line"><span class="comment">// observer 2: 2</span></span><br><span class="line"><span class="comment">// observer 1: 3</span></span><br><span class="line"><span class="comment">// observer 2: 3</span></span><br><span class="line"><span class="comment">// observer 3: 2</span></span><br><span class="line"><span class="comment">// observer 3: 3</span></span><br><span class="line"><span class="comment">// observer 4: 2</span></span><br><span class="line"><span class="comment">// observer 4: 3</span></span><br></pre></td></tr></table></figure>
+<h4 id="publishBehavior-和-BehaviorSubject"><a href="#publishBehavior-和-BehaviorSubject" class="headerlink" title="publishBehavior 和 BehaviorSubject"></a>publishBehavior 和 BehaviorSubject</h4><p><code>publishBehavior</code>可以指定一个默认值。这个默认值一开始是传入的参数，后会被上游的最新数据替代。</p>
+<p>当<code>Observer</code>订阅时，上游流会先把“默认数据”传递给<code>Observer</code>，然后再传递流中的数据。</p>
+<blockquote>
+<p>若上游 Subject 已完结，新的<code>Observer</code>不会接受任何数据，包括默认数据。</p>
+</blockquote>
+
+    </article>
+    <!-- 前后页  -->
+    <ul class="post-paginator">
+        <li class="next">
+            
+        </li>
+        <li class="previous">
+            
+                <div class="prevSlogan">Previous Post</div>
+                <a href= "/2018/06/04/rxjs笔记之操作符/" title= rxjs笔记之操作符 >
+                    <div class="prevTitle">rxjs笔记之操作符</div>
+                </a>
+            
+        </li>
+    </ul>
+    <!-- 评论插件 -->
+    <!-- 来必力City版安装代码 -->
+
+<!-- City版安装代码已完成 -->
+    
+    
+    <!--PC版-->
+
+    <!--PC版-->
+
+
+    
+    <!-- 评论 -->
+</main>
+            <!-- profile -->
+            
+        </div>
+        <footer class="footer footer-unloaded">
+    <!-- social  -->
+    
+    <div class="social">
+        
+    
+        
+            
+                <a href="mailto:mwindsoncn@gmail.com" class="iconfont-archer email" title=email ></a>
+            
+        
+    
+        
+            
+                <a href="https://github.com/mwindson" class="iconfont-archer github" target="_blank" title=github></a>
+            
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+
+    </div>
+    
+    <!-- powered by Hexo  -->
+    <div class="copyright">
+        <span id="hexo-power">Powered by <a href="https://hexo.io/" target="_blank">Hexo</a></span><span class="iconfont-archer power">&#xe635;</span><span id="theme-info">theme <a href="https://github.com/fi3ework/hexo-theme-archer" target="_blank">Archer</a></span>
+    </div>
+    <!-- 不蒜子  -->
+    
+</footer>
+    </div>
+    <!-- toc -->
+    
+    <div class="toc-wrapper" style=
+    
+
+
+
+
+
+
+
+top:35vh;
+
+    >
+        <div class="toc-catalog">
+            <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
+        </div>
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Subject"><span class="toc-number">1.</span> <span class="toc-text">Subject</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#hot-流和-cold-流"><span class="toc-number">1.1.</span> <span class="toc-text">hot 流和 cold 流</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#subject-扮演的角色"><span class="toc-number">1.2.</span> <span class="toc-text">subject 扮演的角色</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#多播操作符"><span class="toc-number">1.3.</span> <span class="toc-text">多播操作符</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#multicast"><span class="toc-number">1.3.1.</span> <span class="toc-text">multicast</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#publish"><span class="toc-number">1.3.2.</span> <span class="toc-text">publish</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#share"><span class="toc-number">1.3.3.</span> <span class="toc-text">share</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#高级-Subject"><span class="toc-number">1.4.</span> <span class="toc-text">高级 Subject</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#publishLast-和-AsyncSubject"><span class="toc-number">1.4.1.</span> <span class="toc-text">publishLast 和 AsyncSubject</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#publishReplay-和-ReplaySubject"><span class="toc-number">1.4.2.</span> <span class="toc-text">publishReplay 和 ReplaySubject</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#publishBehavior-和-BehaviorSubject"><span class="toc-number">1.4.3.</span> <span class="toc-text">publishBehavior 和 BehaviorSubject</span></a></li></ol></li></ol></li></ol>
+    </div>
+    
+    <div class="back-top iconfont-archer">&#xe639;</div>
+    <div class="sidebar sidebar-hide">
+    <ul class="sidebar-tabs sidebar-tabs-active-0">
+        <li class="sidebar-tab-archives"><span class="iconfont-archer">&#xe67d;</span><span class="tab-name">Archive</span></li>
+        <li class="sidebar-tab-tags"><span class="iconfont-archer">&#xe61b;</span><span class="tab-name">Tag</span></li>
+        <li class="sidebar-tab-categories"><span class="iconfont-archer">&#xe666;</span><span class="tab-name">Cate</span></li>
+    </ul>
+    <div class="sidebar-content sidebar-content-show-archive">
+          <div class="sidebar-panel-archives">
+    <!-- 在ejs中将archive按照时间排序 -->
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <div class="total-archive"> Total : 7 </div>
+    
+    <div class="post-archive">
+    
+    
+    
+    
+    <div class="archive-year"> Invalid date </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">Invalid date</span><a class="archive-post-title" href= "/2018/06/08/rxjs笔记之Subject/" >rxjs笔记之Subject</a>
+        </li>
+    
+    
+    
+    
+    
+        </ul>
+    
+    <div class="archive-year"> 2018 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/04</span><a class="archive-post-title" href= "/2018/06/04/rxjs笔记之操作符/" >rxjs笔记之操作符</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/24</span><a class="archive-post-title" href= "/2018/05/24/Node-js笔记之Stream/" >Node.js笔记之Stream</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/21</span><a class="archive-post-title" href= "/2018/05/21/Node-js笔记之cluster/" >Node.js笔记之cluster</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/08</span><a class="archive-post-title" href= "/2018/05/08/新战神—传承与新生/" >新战神—传承与新生</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/22</span><a class="archive-post-title" href= "/2018/04/22/Node-js笔记之fs/" >Node.js笔记之fs</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/22</span><a class="archive-post-title" href= "/2018/04/22/Node-js笔记之Buffer/" >Node.js笔记之Buffer</a>
+        </li>
+    
+    </div>
+  </div>
+        <div class="sidebar-panel-tags">
+    <div class="sidebar-tags-name">
+    
+        <span class="sidebar-tag-name" data-tags="js"><span class="iconfont-archer">&#xe606;</span>js</span>
+    
+        <span class="sidebar-tag-name" data-tags="node"><span class="iconfont-archer">&#xe606;</span>node</span>
+    
+        <span class="sidebar-tag-name" data-tags="rxjs"><span class="iconfont-archer">&#xe606;</span>rxjs</span>
+    
+        <span class="sidebar-tag-name" data-tags="游戏"><span class="iconfont-archer">&#xe606;</span>游戏</span>
+    
+        <span class="sidebar-tag-name" data-tags="PS4"><span class="iconfont-archer">&#xe606;</span>PS4</span>
+    
+        <span class="sidebar-tag-name" data-tags="战神"><span class="iconfont-archer">&#xe606;</span>战神</span>
+    
+    </div>
+    <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>
+    <div class="tag-load-fail" style="display: none; color: #ccc; font-size: 0.6rem;">
+    缺失模块。<br/>
+    1、请确保node版本大于6.2<br/>
+    2、在博客根目录（注意不是archer根目录）执行以下命令：<br/>
+    <span style="color: #f75357; font-size: 1rem; line-height: 2rem;">npm i hexo-generator-json-content --save</span><br/>
+    3、在根目录_config.yml里添加配置：
+    <pre style="color: #787878; font-size: 0.6rem;">
+jsonContent:
+  meta: false
+  pages: false
+  posts:
+    title: true
+    date: true
+    path: true
+    text: false
+    raw: false
+    content: false
+    slug: false
+    updated: false
+    comments: false
+    link: false
+    permalink: false
+    excerpt: false
+    categories: true
+    tags: true</pre>
+    </div> 
+    <div class="sidebar-tags-list"></div>
+</div>
+        <div class="sidebar-panel-categories">
+    <div class="sidebar-categories-name">
+    
+    </div>
+    <div class="iconfont-archer sidebar-categories-empty">&#xe678;</div>
+    <div class="sidebar-categories-list"></div>
+</div>
+    </div>
+</div> 
+    <script>
+    var siteMeta = {
+        root: '/',
+        author: 'John Doe'
+    }
+</script>
+    <!-- busuanzi  -->
+    
+    <!-- CNZZ  -->
+    
+    </div>
+    <!-- async load share.js -->
+    
+        <script src="/scripts/share.js" async></script>    
+    
+    </body>
+</html>
+
+

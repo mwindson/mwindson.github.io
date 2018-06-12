@@ -10,7 +10,7 @@
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" >
     <meta name="description" content="">
-    <title>Node.js笔记之cluster · mwindson&#39;s World</title>
+    <title>rxjs笔记之操作符 · mwindson&#39;s World</title>
     <style type="text/css">
     @font-face {
         font-family: 'Oswald-Regular';
@@ -191,7 +191,7 @@
                 <a href="/" >mwindson&#39;s World</a>
             </div>
             <div class="post-title">
-                <a href="#" class="post-name">Node.js笔记之cluster</a>
+                <a href="#" class="post-name">rxjs笔记之操作符</a>
             </div>
     </div>
     
@@ -223,7 +223,7 @@ height:35vh;
         <h1 class="intro-title">
             <!-- 主页  -->
             
-            Node.js笔记之cluster
+            rxjs笔记之操作符
             <!-- 404 -->
             
         </h1>
@@ -243,13 +243,13 @@ height:35vh;
     
         <a class="post-tag" href="javascript:void(0);" data-tags = "js">js</a>
     
-        <a class="post-tag" href="javascript:void(0);" data-tags = "node">node</a>
+        <a class="post-tag" href="javascript:void(0);" data-tags = "rxjs">rxjs</a>
     
 </div>
             
             <div class="post-intro-meta">
                 <span class="post-intro-calander iconfont-archer">&#xe676;</span>
-                <span class="post-intro-time">2018/05/21</span>
+                <span class="post-intro-time">2018/06/04</span>
                 
                 <span class="shareWrapper">
                     <span class="iconfont-archer shareIcon">&#xe71d;</span>
@@ -350,24 +350,76 @@ height:35vh;
         <div class="container container-unloaded">
             <main class="main post-page">
     <article class="article-entry">
-        <p>由于单个 Node 进程在运行时只能使用其中一个内核，因此简单的 Node 程序无法充分利用多核 CPU。为了解决这个问题，Node 提供了 cluster(集群)API。</p>
-<h3 id="cluster-概述"><a href="#cluster-概述" class="headerlink" title="cluster 概述"></a>cluster 概述</h3><p><code>cluster</code>提供了简单的创建<strong>共享服务器端口</strong>的子进程。</p>
-<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="keyword">const</span> cluster = <span class="built_in">require</span>(<span class="string">'cluster'</span>)</span><br><span class="line"><span class="keyword">const</span> http = <span class="built_in">require</span>(<span class="string">'http'</span>)</span><br><span class="line"><span class="keyword">const</span> numCPUs = <span class="built_in">require</span>(<span class="string">'os'</span>).cpus().length</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (cluster.isMaster) &#123;</span><br><span class="line">  <span class="built_in">console</span>.log(<span class="string">'CPU数'</span>, numCPUs)</span><br><span class="line">  <span class="built_in">console</span>.log(<span class="string">'master is running'</span>)</span><br><span class="line">  <span class="comment">// 根据CPU的核数进行子进程的创建</span></span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">let</span> i = <span class="number">0</span>; i &lt; numCPUs; i++) &#123;</span><br><span class="line">    cluster.fork()</span><br><span class="line">  &#125;</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">  http</span><br><span class="line">    .createServer(<span class="function"><span class="keyword">function</span>(<span class="params">req, res</span>) </span>&#123;</span><br><span class="line">      res.writeHead(<span class="number">200</span>)</span><br><span class="line">      res.end(<span class="string">`a worker running in process <span class="subst">$&#123;process.pid&#125;</span>`</span>)</span><br><span class="line">    &#125;)</span><br><span class="line">    .listen(<span class="number">3000</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h3 id="进程创建、销毁"><a href="#进程创建、销毁" class="headerlink" title="进程创建、销毁"></a>进程创建、销毁</h3><h4 id="进程创建"><a href="#进程创建" class="headerlink" title="进程创建"></a>进程创建</h4><p><code>cluster.fork</code>可以创建一个子进程并返回。<code>fork</code>行为可以通过<code>cluster.setupMaster</code>设置并修改。</p>
-<p>当子进程被 fork 后，<code>cluster</code>主进程的<strong>fork</strong>、<strong>online</strong>事件会依次触发。</p>
-<h4 id="进程销毁"><a href="#进程销毁" class="headerlink" title="进程销毁"></a>进程销毁</h4><p>子进程可以通过<code>disconnect</code>和<code>exit</code>销毁。当子进程退出时，子进程会断开与主进程的IPC管道，然后退出。主进程的<strong>disconnect</strong>、<strong>exit</strong>事件会依次触发。</p>
-<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="keyword">const</span> cluster = <span class="built_in">require</span>(<span class="string">'cluster'</span>)</span><br><span class="line"><span class="keyword">const</span> http = <span class="built_in">require</span>(<span class="string">'http'</span>)</span><br><span class="line"><span class="keyword">const</span> numCPUs = <span class="built_in">require</span>(<span class="string">'os'</span>).cpus().length</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (cluster.isMaster) &#123;</span><br><span class="line">  <span class="built_in">console</span>.log(<span class="string">'CPU数'</span>, numCPUs)</span><br><span class="line">  <span class="built_in">console</span>.log(<span class="string">'master is running'</span>)</span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">let</span> i = <span class="number">0</span>; i &lt; numCPUs; i++) &#123;</span><br><span class="line">    cluster.fork()</span><br><span class="line">  &#125;</span><br><span class="line">  cluster.on(<span class="string">'fork'</span>, worker =&gt; &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">`worker <span class="subst">$&#123;worker.id&#125;</span> is forked`</span>)</span><br><span class="line">  &#125;)</span><br><span class="line">  cluster.on(<span class="string">'online'</span>, worker =&gt; &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">`worker <span class="subst">$&#123;worker.id&#125;</span> is running`</span>)</span><br><span class="line">  &#125;)</span><br><span class="line">  cluster.on(<span class="string">'listening'</span>, (worker, address) =&gt; &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">`A worker <span class="subst">$&#123;worker.id&#125;</span> is now connected to <span class="subst">$&#123;address.address&#125;</span>:<span class="subst">$&#123;address.port&#125;</span>`</span>)</span><br><span class="line">  &#125;)</span><br><span class="line">  cluster.on(<span class="string">'disconnect'</span>, worker =&gt; &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">`worker <span class="subst">$&#123;worker.id&#125;</span> has disconnected`</span>)</span><br><span class="line">  &#125;)</span><br><span class="line">  cluster.on(<span class="string">'exit'</span>, <span class="function"><span class="keyword">function</span>(<span class="params">worker, code, signal</span>) </span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">`Worker <span class="subst">$&#123;worker.id&#125;</span> exit`</span>)</span><br><span class="line">  &#125;)</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">  http</span><br><span class="line">    .createServer(<span class="function"><span class="keyword">function</span>(<span class="params">req, res</span>) </span>&#123;</span><br><span class="line">      res.writeHead(<span class="number">200</span>)</span><br><span class="line">      res.end(<span class="string">`I am a worker running in process <span class="subst">$&#123;process.pid&#125;</span>`</span>)</span><br><span class="line">    &#125;)</span><br><span class="line">    .listen(<span class="number">3000</span>)</span><br><span class="line">  setTimeout(<span class="function"><span class="params">()</span> =&gt;</span> process.disconnect(), <span class="number">1000</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h3 id="进程通信"><a href="#进程通信" class="headerlink" title="进程通信"></a>进程通信</h3><p>在<code>cluster</code>模块中，父子进程通过<a href="https://zh.wikipedia.org/wiki/%E8%A1%8C%E7%A8%8B%E9%96%93%E9%80%9A%E8%A8%8A" target="_blank" rel="noopener">IPC</a>的方式进行通信。</p>
+        <h2 id="高阶-Observable-操作符"><a href="#高阶-Observable-操作符" class="headerlink" title="高阶 Observable 操作符"></a>高阶 Observable 操作符</h2><h3 id="合并类"><a href="#合并类" class="headerlink" title="合并类"></a>合并类</h3><p>高阶 Observable 的合并类操作符在 Observable 对象的操作符后面加上了 All，包括<code>concatAll</code>、<code>mergeAll</code>、<code>zipAll</code>、<code>combineAll</code>（<code>combineLatestAll</code>）。</p>
+<blockquote>
+<p>高阶 Observable 操作符没有<code>withLatestFromAll</code>，因为高阶合并操作符认为内部 Observable 对象是平等的。而<code>withLatestFrom</code>会由输入 Observable 对象控制数据输出节奏，Observable 对象并不平等。</p>
+</blockquote>
+<h4 id="concatAll"><a href="#concatAll" class="headerlink" title="concatAll"></a>concatAll</h4><p><code>concatAll</code>的作用与<code>concat</code>类似，不过<code>concatAll</code>的上游对象是一个高阶 Observable 对象。它会对其中的内部 Observable 对象进行<code>concat</code>操作，即将内部多个 Observable 对象进行<code>concat</code>操作并返回结果 Observable 对象。</p>
+<p>当内部 Observable 对象完结速度慢或永不完结时，<code>concatAll</code>的合并速度慢于上游的 Observable 对象产生内部 Observable 对象的速度，这样就会造成数据积压，进而导致内存泄漏。</p>
+<h4 id="mergeAll"><a href="#mergeAll" class="headerlink" title="mergeAll"></a>mergeAll</h4><p><code>mergeAll</code>作用同<code>merge</code>。当上游源产生一个内部 Observable 对象时，<code>mergeAll</code>会立刻订阅，并用于合并。</p>
+<h4 id="zipAll"><a href="#zipAll" class="headerlink" title="zipAll"></a>zipAll</h4><p><code>zipAll</code>对内部 Observable 对象的作用和<code>zip</code>一样。<code>zipAll</code>必须等到上游源 Observable 对象完结后才能开始，因为<code>zipAll</code>不确定是否还有新的 Observable 对象出现，因此当上游 Observable 永不完结时，<code>zipAll</code>将一直等待。</p>
+<h4 id="combineAll"><a href="#combineAll" class="headerlink" title="combineAll"></a>combineAll</h4><p><code>combineAll</code>的作用同<code>combineLatest</code>一样。同样，<code>combineAll</code>也必须等到上游源 Observable 对象完结后才能开始。</p>
+<blockquote>
+<p><code>zipAll</code>和<code>combineAll</code>会在内部流产生时，收集内部流，并且直到上游流流结束时，才会订阅收集到的内部流。这样会导致由于上游流流吐出的时间间隔而出现的内部流订阅的时间间隔消失，并且所有内部流的订阅时间点推迟到上游流流结束。这一点与<code>mergeAll</code>不同，<code>meregeAll</code>会在内部流产生时订阅。</p>
+</blockquote>
+<p><img src="./合并前的流.png" alt="合并前的流"></p>
+<center>合并前的流</center>
+
+<p><img src="./mergeAll.png" alt="mergeAll后的流"></p>
+<center>调用mergeAll后的流</center>
+
+<p><img src="./combineAll.png" alt="combineAll后的流"></p>
+<center>调用combineAll后的流</center>
+
+<h3 id="处理类"><a href="#处理类" class="headerlink" title="处理类"></a>处理类</h3><h4 id="switch"><a href="#switch" class="headerlink" title="switch"></a>switch</h4><p>当上游流产生一个内部流时，switch 会立刻订阅新的内部流，已经订阅的内部流会被退订。</p>
+<p>switch 产生的流只有当上游流且<strong>当前</strong>订阅的内部流结束时才结束</p>
+<p><img src="./switch.png" alt="switch"></p>
+<h4 id="exhaust"><a href="#exhaust" class="headerlink" title="exhaust"></a>exhaust</h4><p>只有当当前订阅的内部流被耗尽时，才会切换到最新产生的内部流</p>
+<p>exhaust 产生的流只有当上游流且<strong>最新</strong>订阅的内部流结束时才结束</p>
+<p><img src="./exhaust.png" alt="exhaust"></p>
+<blockquote>
+<p>switch 和 exhaust 产生的流只有当上游流且当前订阅的内部流结束时才结束</p>
+</blockquote>
+<h2 id="过滤操作符"><a href="#过滤操作符" class="headerlink" title="过滤操作符"></a>过滤操作符</h2><p>过滤操作符会根据数据是否满足判定函数来进行对应的操作。</p>
+<h3 id="filter"><a href="#filter" class="headerlink" title="filter"></a>filter</h3><p><code>filter</code>即只吐出上游流符合判定函数的数据</p>
+<h3 id="first"><a href="#first" class="headerlink" title="first"></a>first</h3><p><code>first</code>接受三个参数——判定函数、结果处理函数和默认值（默认为 null）。当上游数据符合判定函数时，<code>first</code>吐出经结果处理函数处理之后的数据并结束，无需等上游流结束，若等到上游流结束时，仍没有符合条件的数据，那么会吐出经过处理的默认值并结束。</p>
+<h3 id="last"><a href="#last" class="headerlink" title="last"></a>last</h3><p><code>last</code>操作符作用和 <code>first</code> 相反，同样也接受三个参数——判断函数、结果处理函数、默认值。</p>
+<p><code>last</code>必须等到上游流结束时，才能确定结果，吐出结果数据。</p>
+<h3 id="take、tabkeLast、takeWhile-和-takeUntil"><a href="#take、tabkeLast、takeWhile-和-takeUntil" class="headerlink" title="take、tabkeLast、takeWhile 和 takeUntil"></a>take、tabkeLast、takeWhile 和 takeUntil</h3><p><code>take</code>系列操作符用于取多个数据，<code>take</code>和<code>takeLast</code>会在结束时一次性返回所有符合的数据，而<code>takeWhile</code>和<code>takeUntil</code>会随上游流的节奏吐出符合的数据。</p>
 <ul>
-<li>父进程消息发送：<code>worker.send()</code>或<code>ChildProcess.send()</code></li>
-<li>父进程消息接受：<code>cluster</code>监听 message</li>
-<li>子进程消息发送：<code>process</code>监听 message</li>
+<li><code>take</code> —— 相当于取多个数据的<code>first</code></li>
+<li><code>takeLast</code> —— 相当于取多个的<code>last</code></li>
+<li><code>takeWhile</code> —— <code>takeWhile</code>会一直吐出上游数据，直到<strong>上游数据不满足判定函数</strong></li>
+<li><code>takeUntil</code> —— <code>takeUntil</code>会一直吐出上游数据，直到<strong>参数 notifier 流</strong>吐出数据时，停止吐出数据。</li>
 </ul>
-<p>父子进程相互通信并且遍历<code>cluster.workers</code>查看运行 worker 的 id</p>
-<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="keyword">const</span> cluster = <span class="built_in">require</span>(<span class="string">'cluster'</span>)</span><br><span class="line"><span class="keyword">const</span> http = <span class="built_in">require</span>(<span class="string">'http'</span>)</span><br><span class="line"><span class="keyword">const</span> numCPUs = <span class="built_in">require</span>(<span class="string">'os'</span>).cpus().length</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (cluster.isMaster) &#123;</span><br><span class="line">  <span class="built_in">console</span>.log(<span class="string">'[master] '</span> + <span class="string">'start master...'</span>)</span><br><span class="line"></span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">let</span> i = <span class="number">0</span>; i &lt; numCPUs; i++) &#123;</span><br><span class="line">    <span class="keyword">const</span> wk = cluster.fork()</span><br><span class="line">    wk.send(<span class="string">'[master] '</span> + <span class="string">'hi worker'</span> + wk.id)</span><br><span class="line">  &#125;</span><br><span class="line">  cluster.on(<span class="string">'message'</span>, (worker, msg, handle) =&gt; &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">`[worker] worker <span class="subst">$&#123;worker.id&#125;</span> : <span class="subst">$&#123;msg&#125;</span>`</span>)</span><br><span class="line">  &#125;)</span><br><span class="line">  cluster.on(<span class="string">'exit'</span>, (worker, code, signal) =&gt; &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">`[worker] <span class="subst">$&#123;worker.id&#125;</span> disconnected`</span>)</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">let</span> id <span class="keyword">in</span> cluster.workers) &#123;</span><br><span class="line">      <span class="built_in">console</span>.log(<span class="string">`woker <span class="subst">$&#123;id&#125;</span> is working`</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    cluster.fork()</span><br><span class="line">  &#125;)</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">  process.on(<span class="string">'message'</span>, <span class="function"><span class="keyword">function</span>(<span class="params">msg</span>) </span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">'[worker] '</span> + msg)</span><br><span class="line">    process.send(<span class="string">'[worker] worker'</span> + cluster.worker.id + <span class="string">' received!'</span>)</span><br><span class="line">    process.disconnect()</span><br><span class="line">  &#125;)</span><br><span class="line">  http.createServer().listen(<span class="number">3000</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h3 id="负载均衡"><a href="#负载均衡" class="headerlink" title="负载均衡"></a>负载均衡</h3><p><code>cluster</code>模块的调度策略通过<code>cluster.schedulingPolicy</code>来设置。根据Node文档，除Windows外的操作系统中，<code>cluster</code>模块默认使用round-robin算法进行负载均衡。</p>
-<p>在Windows系统中需要设置<code>cluster.schedulingPolicy = cluster.SCHED_RR</code>来启用RR算法来负载均衡</p>
-<h3 id="pm2"><a href="#pm2" class="headerlink" title="pm2"></a>pm2</h3><p>PM2是一个用于Node.js应用的进程管理程序，通过`-i选项来设置来开启cluster模式。另外，PM2还具有无间断重启、增加进程个数的优势。<br><figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line">$ pm2 start app.js -i <span class="number">4</span></span><br></pre></td></tr></table></figure></p>
+<p><img src="./takeUntil.png" alt="takeUntil"></p>
+<center>takeUntil弹珠图</center>
+
+<h3 id="skip、skipWhile-和-skipUntil"><a href="#skip、skipWhile-和-skipUntil" class="headerlink" title="skip、skipWhile 和 skipUntil"></a>skip、skipWhile 和 skipUntil</h3><p><code>skip</code>表示跳过若干数据后，吐出和上游流一样的数据</p>
+<p><code>skipWhile</code>与<code>takeWhile</code>、<code>skipUntil</code>与<code>skipUntil</code>一一对应</p>
+<h2 id="控制类操作符"><a href="#控制类操作符" class="headerlink" title="控制类操作符"></a>控制类操作符</h2><p>控制操作符主要是为了解决上下游速度不一致导致的<code>BackPressure</code>问题，对上游数据进行一定的舍弃，来实现<strong>有损</strong>的回压控制。</p>
+<p>每一类控制操作符默认用另一个流来控制，而简单的以时间做控制的操作符加上了 Time 后缀。</p>
+<h3 id="throttle、throtlleTime"><a href="#throttle、throtlleTime" class="headerlink" title="throttle、throtlleTime"></a>throttle、throtlleTime</h3><h3 id="debounce、debounceTime"><a href="#debounce、debounceTime" class="headerlink" title="debounce、debounceTime"></a>debounce、debounceTime</h3><h3 id="audit、auditTime"><a href="#audit、auditTime" class="headerlink" title="audit、auditTime"></a>audit、auditTime</h3><h3 id="sample、sampleTime"><a href="#sample、sampleTime" class="headerlink" title="sample、sampleTime"></a>sample、sampleTime</h3><h2 id="转化类操作符"><a href="#转化类操作符" class="headerlink" title="转化类操作符"></a>转化类操作符</h2><p>转化类操作符会对数据进行处理，但转化类操作符不会对数据进行过滤，会对数据进行转化和组合。</p>
+<h3 id="map、mapTo、pluck"><a href="#map、mapTo、pluck" class="headerlink" title="map、mapTo、pluck"></a>map、mapTo、pluck</h3><p><code>map</code>是最简单、最常用的转化操作符。<code>map</code>会对上游数据进行函数处理，并把返回结果传给下游流。</p>
+<p><code>mapTo</code>会把所有数据映射成同一个数据，并传给下游。</p>
+<p><code>pluck</code>类似根据传入参数 key 来取上游数据中对应 key 的值，并传给下游。<code>plunk</code>只能去一个值，而不能嵌套取值。当对应 key 不存在时，<code>pluck</code>可以把传入的第二个参数作为默认值（默认为 undefined）传给下游。</p>
+<h3 id="缓存数组类和缓存-Observable-类"><a href="#缓存数组类和缓存-Observable-类" class="headerlink" title="缓存数组类和缓存 Observable 类"></a>缓存数组类和缓存 Observable 类</h3><p>和控制类操作符实现的有损回压控制不同，转化类操作符不会舍弃上游的数据。它会通过将多个数据放在一个数组和 Observable 对象并且一次性传给下游，从而实现<strong>无损</strong>的回压控制。因此可以把这类操作符分为缓存数组类和缓存 Observable 类，两者的区别只在于传给下游流的数据形式。</p>
+<ul>
+<li>缓存数组类 bufferTime、bufferCount、bufferWhen、bufferToggle、buffer</li>
+<li>缓存 Observable 类 windowTime、windowCount、windowWhen、windowToggle、window</li>
+</ul>
+<h4 id="bufferTime-和-windowTime"><a href="#bufferTime-和-windowTime" class="headerlink" title="bufferTime 和 windowTime"></a>bufferTime 和 windowTime</h4><p><code>bufferTime</code>和<code>windowTime</code>接受三个参数。第一个参数是区间时间长度，操作符会将下游划分为该时间长度的时间区间，并对这段时间内的数据进行分组，以数组形式或内部流的形式传给下游。</p>
+<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="keyword">let</span> s1$ = Rx.Observable.timer(<span class="number">0</span>, <span class="number">200</span>)</span><br><span class="line">  .take(<span class="number">3</span>)</span><br><span class="line">  .concat(Rx.Observable.timer(<span class="number">500</span>, <span class="number">300</span>).take(<span class="number">4</span>))</span><br><span class="line">  .concat(Rx.Observable.interval(<span class="number">500</span>).take(<span class="number">4</span>))</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> s2$ = s1$.bufferTime(<span class="number">1200</span>)</span><br><span class="line"><span class="keyword">let</span> s3$ = s1$.windowTime(<span class="number">1200</span>)</span><br></pre></td></tr></table></figure>
+<p><img src="./bufferTime和windowTime.png" alt="bufferTime和windowTime"></p>
+<p>这两个操作符的第二个参数表示每个时间区间开始的时间间隔。因此当第二个参数小于第一个参数时，时间区间会重叠，可能会导致重复的数据，而第二个参数大于第二个参数时，时间区间产生间距，可能会导致数据丢失。</p>
+<p>第三个参数表示该区间内最多数据个数。</p>
+<p>因此，<code>windowTime</code>产生的内部流会持续一段时间，并在<strong>持续时间等于时间区间或达到区间数据上限</strong>时结束，而<code>bufferTime</code>会在<strong>区间时间结束或达到区间数据上限</strong>时将数据数组传给下游。</p>
+<h4 id="bufferCount-和-windowCount"><a href="#bufferCount-和-windowCount" class="headerlink" title="bufferCount 和 windowCount"></a>bufferCount 和 windowCount</h4><p><code>windowCount</code>、<code>bufferCount</code>和<code>windowTime</code>、<code>bufferTime</code>类似，区间长度由数据个数决定，根据接受的数据个数来决定数组传给下游或内部流结束的时间。第二个参数表示每隔多少个数据产生区间，因此也会产生丢弃数据和数据重复的现象。</p>
+<h4 id="bufferWhen-和-windowWhen"><a href="#bufferWhen-和-windowWhen" class="headerlink" title="bufferWhen 和 windowWhen"></a>bufferWhen 和 windowWhen</h4><p>同样的，<code>bufferWhen</code>和<code>windowWhen</code>会根据传入函数返回的 Observable 对象来划分区间，当返回的流<strong>产生数据或完结</strong>时，操作符会将数据数组传给下游或者结束内部流，产生新的内部流。</p>
+<blockquote>
+<p><code>bufferWhen</code>和<code>windowWhen</code>没有其他参数。</p>
+</blockquote>
+<h4 id="bufferToggle-和-windowToggle"><a href="#bufferToggle-和-windowToggle" class="headerlink" title="bufferToggle 和 windowToggle"></a>bufferToggle 和 windowToggle</h4><p><code>windowToggle</code>、<code>bufferToggle</code></p>
 
     </article>
     <!-- 前后页  -->
@@ -375,16 +427,16 @@ height:35vh;
         <li class="next">
             
                 <div class="nextSlogan">Next Post</div>
-                <a href= "/2018/05/24/Node-js笔记之Stream/" title= Node.js笔记之Stream >
-                    <div class="nextTitle">Node.js笔记之Stream</div>
+                <a href= "/2018/06/08/rxjs笔记之Subject/" title= rxjs笔记之Subject >
+                    <div class="nextTitle">rxjs笔记之Subject</div>
                 </a>
             
         </li>
         <li class="previous">
             
                 <div class="prevSlogan">Previous Post</div>
-                <a href= "/2018/05/08/新战神—传承与新生/" title= 新战神—传承与新生 >
-                    <div class="prevTitle">新战神—传承与新生</div>
+                <a href= "/2018/05/24/Node-js笔记之Stream/" title= Node.js笔记之Stream >
+                    <div class="prevTitle">Node.js笔记之Stream</div>
                 </a>
             
         </li>
@@ -478,7 +530,7 @@ top:35vh;
         <div class="toc-catalog">
             <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
         </div>
-        <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#cluster-概述"><span class="toc-number">1.</span> <span class="toc-text">cluster 概述</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#进程创建、销毁"><span class="toc-number">2.</span> <span class="toc-text">进程创建、销毁</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#进程创建"><span class="toc-number">2.1.</span> <span class="toc-text">进程创建</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#进程销毁"><span class="toc-number">2.2.</span> <span class="toc-text">进程销毁</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#进程通信"><span class="toc-number">3.</span> <span class="toc-text">进程通信</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#负载均衡"><span class="toc-number">4.</span> <span class="toc-text">负载均衡</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#pm2"><span class="toc-number">5.</span> <span class="toc-text">pm2</span></a></li></ol>
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#高阶-Observable-操作符"><span class="toc-number">1.</span> <span class="toc-text">高阶 Observable 操作符</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#合并类"><span class="toc-number">1.1.</span> <span class="toc-text">合并类</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#concatAll"><span class="toc-number">1.1.1.</span> <span class="toc-text">concatAll</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#mergeAll"><span class="toc-number">1.1.2.</span> <span class="toc-text">mergeAll</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#zipAll"><span class="toc-number">1.1.3.</span> <span class="toc-text">zipAll</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#combineAll"><span class="toc-number">1.1.4.</span> <span class="toc-text">combineAll</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#处理类"><span class="toc-number">1.2.</span> <span class="toc-text">处理类</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#switch"><span class="toc-number">1.2.1.</span> <span class="toc-text">switch</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#exhaust"><span class="toc-number">1.2.2.</span> <span class="toc-text">exhaust</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#过滤操作符"><span class="toc-number">2.</span> <span class="toc-text">过滤操作符</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#filter"><span class="toc-number">2.1.</span> <span class="toc-text">filter</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#first"><span class="toc-number">2.2.</span> <span class="toc-text">first</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#last"><span class="toc-number">2.3.</span> <span class="toc-text">last</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#take、tabkeLast、takeWhile-和-takeUntil"><span class="toc-number">2.4.</span> <span class="toc-text">take、tabkeLast、takeWhile 和 takeUntil</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#skip、skipWhile-和-skipUntil"><span class="toc-number">2.5.</span> <span class="toc-text">skip、skipWhile 和 skipUntil</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#控制类操作符"><span class="toc-number">3.</span> <span class="toc-text">控制类操作符</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#throttle、throtlleTime"><span class="toc-number">3.1.</span> <span class="toc-text">throttle、throtlleTime</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#debounce、debounceTime"><span class="toc-number">3.2.</span> <span class="toc-text">debounce、debounceTime</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#audit、auditTime"><span class="toc-number">3.3.</span> <span class="toc-text">audit、auditTime</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#sample、sampleTime"><span class="toc-number">3.4.</span> <span class="toc-text">sample、sampleTime</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#转化类操作符"><span class="toc-number">4.</span> <span class="toc-text">转化类操作符</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#map、mapTo、pluck"><span class="toc-number">4.1.</span> <span class="toc-text">map、mapTo、pluck</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#缓存数组类和缓存-Observable-类"><span class="toc-number">4.2.</span> <span class="toc-text">缓存数组类和缓存 Observable 类</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#bufferTime-和-windowTime"><span class="toc-number">4.2.1.</span> <span class="toc-text">bufferTime 和 windowTime</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#bufferCount-和-windowCount"><span class="toc-number">4.2.2.</span> <span class="toc-text">bufferCount 和 windowCount</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#bufferWhen-和-windowWhen"><span class="toc-number">4.2.3.</span> <span class="toc-text">bufferWhen 和 windowWhen</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#bufferToggle-和-windowToggle"><span class="toc-number">4.2.4.</span> <span class="toc-text">bufferToggle 和 windowToggle</span></a></li></ol></li></ol></li></ol>
     </div>
     
     <div class="back-top iconfont-archer">&#xe639;</div>

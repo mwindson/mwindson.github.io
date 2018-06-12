@@ -357,7 +357,7 @@ height:35vh;
 <li><code>Buffer.alloc()</code></li>
 <li><code>Buffer.allocUnsafe()</code> </li>
 </ul>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// buf1:  &lt;Buffer 00 00 00 00 00 00 00 00 00 00&gt;</span></span><br><span class="line"><span class="keyword">const</span> buf1 = Buffer.alloc(<span class="number">10</span>)</span><br><span class="line"><span class="comment">// buf2:  &lt;Buffer 01 01 01 01 01 01 01 01 01 01&gt;</span></span><br><span class="line"><span class="keyword">const</span> buf2 = Buffer.alloc(<span class="number">10</span>, <span class="number">1</span>)</span><br><span class="line"><span class="comment">// buf3  &lt;Buffer 01 02 03 04&gt;</span></span><br><span class="line"><span class="keyword">const</span> buf3 = Buffer.from([<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>])</span><br><span class="line"><span class="comment">// buf4  &lt;Buffer 74 65 73 74&gt;</span></span><br><span class="line"><span class="keyword">const</span> buf4 = Buffer.from(<span class="string">'test'</span>)</span><br><span class="line"><span class="comment">// 由于allocUnsafe方法会导致Buffer含有旧数据，因此结果不确定</span></span><br><span class="line"><span class="comment">// 内容必须被初始化，用buf.fill()来初始化</span></span><br><span class="line"><span class="keyword">const</span> buf5 = Buffer.allocUnsafe(<span class="number">10</span>)</span><br></pre></td></tr></table></figure>
+<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="comment">// buf1:  &lt;Buffer 00 00 00 00 00 00 00 00 00 00&gt;</span></span><br><span class="line"><span class="keyword">const</span> buf1 = Buffer.alloc(<span class="number">10</span>)</span><br><span class="line"><span class="comment">// buf2:  &lt;Buffer 01 01 01 01 01 01 01 01 01 01&gt;</span></span><br><span class="line"><span class="keyword">const</span> buf2 = Buffer.alloc(<span class="number">10</span>, <span class="number">1</span>)</span><br><span class="line"><span class="comment">// buf3  &lt;Buffer 01 02 03 04&gt;</span></span><br><span class="line"><span class="keyword">const</span> buf3 = Buffer.from([<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>])</span><br><span class="line"><span class="comment">// buf4  &lt;Buffer 74 65 73 74&gt;</span></span><br><span class="line"><span class="keyword">const</span> buf4 = Buffer.from(<span class="string">'test'</span>)</span><br><span class="line"><span class="comment">// 由于allocUnsafe方法会导致Buffer含有旧数据，因此结果不确定</span></span><br><span class="line"><span class="comment">// 内容必须被初始化，用buf.fill()来初始化</span></span><br><span class="line"><span class="keyword">const</span> buf5 = Buffer.allocUnsafe(<span class="number">10</span>)</span><br></pre></td></tr></table></figure>
 <blockquote>
 <p><code>Buffer.allocUnsafe()</code> 速度快，但不安全</p>
 </blockquote>
@@ -378,10 +378,10 @@ height:35vh;
 <p>字符串进行编码的方式有两种：</p>
 <ul>
 <li><p>通过<code>Buffer.from(string[, encoding])</code>进行</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// buf6  &lt;Buffer 74 65 73 74&gt;</span></span><br><span class="line"><span class="keyword">const</span> buf6 = Buffer.from(<span class="string">'test'</span>, <span class="string">'ascii'</span>)</span><br></pre></td></tr></table></figure>
+<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="comment">// buf6  &lt;Buffer 74 65 73 74&gt;</span></span><br><span class="line"><span class="keyword">const</span> buf6 = Buffer.from(<span class="string">'test'</span>, <span class="string">'ascii'</span>)</span><br></pre></td></tr></table></figure>
 </li>
 <li><p>通过<code>buf.toString([encoding[, start[, end]]])</code>进行</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> buf6 = Buffer.from(<span class="string">'test'</span>)</span><br><span class="line"><span class="comment">// 74657374</span></span><br><span class="line">buf6.toString(<span class="string">'hex'</span>)</span><br></pre></td></tr></table></figure>
+<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="keyword">const</span> buf6 = Buffer.from(<span class="string">'test'</span>)</span><br><span class="line"><span class="comment">// 74657374</span></span><br><span class="line">buf6.toString(<span class="string">'hex'</span>)</span><br></pre></td></tr></table></figure>
 </li>
 </ul>
 <h2 id="其他类方法"><a href="#其他类方法" class="headerlink" title="其他类方法"></a>其他类方法</h2><p>还有一些 <code>Buffer</code> 常用的 API</p>
@@ -396,7 +396,7 @@ height:35vh;
 <li><code>buf.copy</code>：将一个 buf 的（部分）内容复制到另外一个 buf 中</li>
 <li><code>buf.equals</code>:如果 buf 与 otherBuffer 具有完全相同的字节，则返回 true，否则返回 false</li>
 <li><p><code>buf.toJSON</code>：将buf转换成JSON格式的数据</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> buf6 = Buffer.from(<span class="string">'test'</span>)</span><br><span class="line"><span class="built_in">console</span>.log(buf6.toJSON())</span><br><span class="line"><span class="comment">// 输出 &#123; type: 'Buffer', data: [ 116, 101, 115, 116 ] &#125;</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="keyword">const</span> buf6 = Buffer.from(<span class="string">'test'</span>)</span><br><span class="line"><span class="built_in">console</span>.log(buf6.toJSON())</span><br><span class="line"><span class="comment">// 输出 &#123; type: 'Buffer', data: [ 116, 101, 115, 116 ] &#125;</span></span><br></pre></td></tr></table></figure>
 </li>
 <li><p>一些指定字节格式读写的API</p>
 </li>
@@ -409,8 +409,8 @@ height:35vh;
         <li class="next">
             
                 <div class="nextSlogan">Next Post</div>
-                <a href= "/2018/05/21/Node-js笔记之cluster/" title= Node.js笔记之cluster >
-                    <div class="nextTitle">Node.js笔记之cluster</div>
+                <a href= "/2018/04/22/Node-js笔记之fs/" title= Node.js笔记之fs >
+                    <div class="nextTitle">Node.js笔记之fs</div>
                 </a>
             
         </li>
@@ -547,15 +547,78 @@ top:35vh;
     
     
     
-    <div class="total-archive"> Total : 3 </div>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <div class="total-archive"> Total : 7 </div>
     
     <div class="post-archive">
     
     
     
     
+    <div class="archive-year"> Invalid date </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">Invalid date</span><a class="archive-post-title" href= "/2018/06/08/rxjs笔记之Subject/" >rxjs笔记之Subject</a>
+        </li>
+    
+    
+    
+    
+    
+        </ul>
+    
     <div class="archive-year"> 2018 </div>
     <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/04</span><a class="archive-post-title" href= "/2018/06/04/rxjs笔记之操作符/" >rxjs笔记之操作符</a>
+        </li>
     
     
         <li class="archive-post-item">
@@ -565,6 +628,16 @@ top:35vh;
     
         <li class="archive-post-item">
             <span class="archive-post-date">05/21</span><a class="archive-post-title" href= "/2018/05/21/Node-js笔记之cluster/" >Node.js笔记之cluster</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/08</span><a class="archive-post-title" href= "/2018/05/08/新战神—传承与新生/" >新战神—传承与新生</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/22</span><a class="archive-post-title" href= "/2018/04/22/Node-js笔记之fs/" >Node.js笔记之fs</a>
         </li>
     
     
@@ -580,6 +653,8 @@ top:35vh;
         <span class="sidebar-tag-name" data-tags="js"><span class="iconfont-archer">&#xe606;</span>js</span>
     
         <span class="sidebar-tag-name" data-tags="node"><span class="iconfont-archer">&#xe606;</span>node</span>
+    
+        <span class="sidebar-tag-name" data-tags="rxjs"><span class="iconfont-archer">&#xe606;</span>rxjs</span>
     
         <span class="sidebar-tag-name" data-tags="游戏"><span class="iconfont-archer">&#xe606;</span>游戏</span>
     
