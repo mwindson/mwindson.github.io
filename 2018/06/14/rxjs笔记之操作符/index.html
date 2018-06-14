@@ -249,7 +249,7 @@ height:35vh;
             
             <div class="post-intro-meta">
                 <span class="post-intro-calander iconfont-archer">&#xe676;</span>
-                <span class="post-intro-time">2018/06/04</span>
+                <span class="post-intro-time">2018/06/14</span>
                 
                 <span class="shareWrapper">
                     <span class="iconfont-archer shareIcon">&#xe71d;</span>
@@ -397,13 +397,33 @@ height:35vh;
 
 <h3 id="skip、skipWhile-和-skipUntil"><a href="#skip、skipWhile-和-skipUntil" class="headerlink" title="skip、skipWhile 和 skipUntil"></a>skip、skipWhile 和 skipUntil</h3><p><code>skip</code>表示跳过若干数据后，吐出和上游流一样的数据</p>
 <p><code>skipWhile</code>与<code>takeWhile</code>、<code>skipUntil</code>与<code>skipUntil</code>一一对应</p>
-<h2 id="控制类操作符"><a href="#控制类操作符" class="headerlink" title="控制类操作符"></a>控制类操作符</h2><p>控制操作符主要是为了解决上下游速度不一致导致的<code>BackPressure</code>问题，对上游数据进行一定的舍弃，来实现<strong>有损</strong>的回压控制。</p>
+<h2 id="控制操作符"><a href="#控制操作符" class="headerlink" title="控制操作符"></a>控制操作符</h2><p>控制操作符主要是为了解决上下游速度不一致导致的<code>BackPressure</code>问题，对上游数据进行一定的舍弃，来实现<strong>有损</strong>的回压控制。</p>
 <p>每一类控制操作符默认用另一个流来控制，而简单的以时间做控制的操作符加上了 Time 后缀。</p>
-<h3 id="throttle、throtlleTime"><a href="#throttle、throtlleTime" class="headerlink" title="throttle、throtlleTime"></a>throttle、throtlleTime</h3><h3 id="debounce、debounceTime"><a href="#debounce、debounceTime" class="headerlink" title="debounce、debounceTime"></a>debounce、debounceTime</h3><h3 id="audit、auditTime"><a href="#audit、auditTime" class="headerlink" title="audit、auditTime"></a>audit、auditTime</h3><h3 id="sample、sampleTime"><a href="#sample、sampleTime" class="headerlink" title="sample、sampleTime"></a>sample、sampleTime</h3><h2 id="转化类操作符"><a href="#转化类操作符" class="headerlink" title="转化类操作符"></a>转化类操作符</h2><p>转化类操作符会对数据进行处理，但转化类操作符不会对数据进行过滤，会对数据进行转化和组合。</p>
+<h3 id="throtlleTime、debounceTime、auditTime"><a href="#throtlleTime、debounceTime、auditTime" class="headerlink" title="throtlleTime、debounceTime、auditTime"></a>throtlleTime、debounceTime、auditTime</h3><p><code>throttleTime</code>限制在 duration 的时间内上游传递给下游数据个数。<code>throttleTime</code>在获得上游数据后，会先把数据传递给下游，再开始计时。新的数据不会导致时间窗口重新更新计时。</p>
+<p><code>debounceTime</code>限制传递给下游的两个数据之间时间不能小于给定时间。<code>debounceTime</code>在获得上游数据后，会先开始计时，如果计时内未出现新的数据，才会把缓存的窗口内第一个数据传递给下游；如果出现新的数据，那么<code>debounceTime</code>就会开启新的计时，并更新缓存的数据。</p>
+<p><code>auditTime</code>和<code>throttleTime</code>的原理相似。在一定时间内，<code>throttle</code>会把第一个数据传给下游，而<code>audit</code>会把最后一个传给下游。</p>
+<p>旧时间窗口结束后，只有当上游吐出数据时，才会开始三者的新时间窗口的计时。</p>
+<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="keyword">let</span> s1$ = Rx.Observable.interval(<span class="number">400</span>)</span><br><span class="line">  .take(<span class="number">2</span>)</span><br><span class="line">  .mapTo(<span class="string">'A'</span>)</span><br><span class="line">  .concat(</span><br><span class="line">    Rx.Observable.interval(<span class="number">800</span>)</span><br><span class="line">      .take(<span class="number">3</span>)</span><br><span class="line">      .mapTo(<span class="string">'B'</span>)</span><br><span class="line">  )</span><br><span class="line">  .concat(</span><br><span class="line">    Rx.Observable.interval(<span class="number">300</span>)</span><br><span class="line">      .take(<span class="number">4</span>)</span><br><span class="line">      .mapTo(<span class="string">'C'</span>)</span><br><span class="line">  )</span><br><span class="line"></span><br><span class="line">s1$.throttleTime(<span class="number">500</span>)</span><br><span class="line">s1$.debounceTime(<span class="number">500</span>)</span><br><span class="line">s1$.auditTime(<span class="number">500</span>)</span><br></pre></td></tr></table></figure>
+<p><img src="./throttleTime、debounceTime和auditTime.png" alt="throttleTime、debounceTime和auditTime"></p>
+<h3 id="throttle、debounce、audit"><a href="#throttle、debounce、audit" class="headerlink" title="throttle、debounce、audit"></a>throttle、debounce、audit</h3><p><code>throttle</code>、<code>debounce</code>、<code>audit</code>是带 Time 后缀的通用版，操作符接受<code>seletor</code>函数参数，该函数可根据数据产生一个 Observable 对象来决定节流时间。</p>
+<h3 id="sample、sampleTime"><a href="#sample、sampleTime" class="headerlink" title="sample、sampleTime"></a>sample、sampleTime</h3><p><code>sample</code>和<code>sampleTime</code>与之前的操作符有所不同。这两个操作符不管上游如何产生数据，只根据自己设定的规则参数来将符合条件的数据传递给下游。</p>
+<p><code>sampleTime</code>会根据设定的时间参数，从数据流<strong>起始</strong>处将时间划分为等长的区间。<code>sampleTime</code>会在这个时间块结束时判断这个时间块内是否有数据，如果有数据，那么会把s上游最后一个数据传给下游流，如果时间块内没有数据，那么操作符不会给下游传递数据。</p>
+<p><code>sample</code>接受一个notifier流，当notifier流产生数据时，<code>sample</code>就会把上游最后一个产生的数据传给下游。</p>
+<p><img src="./sampleTime.png" alt="sampleTime"></p>
+<h3 id="distinct"><a href="#distinct" class="headerlink" title="distinct"></a>distinct</h3><p><code>distinct</code>只会把未出现过的数据传递给下游，上游相同的数据只有第一次能传递给下游。<code>distinct</code>可以接受一个函数<code>keySelector</code>来控制对象类型数据中哪个属性用于比较。</p>
+<p><code>distinct</code>第二个参数是一个 Observable 对象，每当 Observable 对象产生数据时，<code>distinct</code>会清空内部用于保存只出现数据的集合，这样可以避免大量数据时的内存泄漏，也可以控制在一段时间范围内，下游数据唯一。</p>
+<h3 id="distinctUntilChanged"><a href="#distinctUntilChanged" class="headerlink" title="distinctUntilChanged"></a>distinctUntilChanged</h3><p><code>distinctUntilChanged</code>也会舍弃重复的数据，不过这个操作符只会比较当前数据和上一个数据。</p>
+<p>源数据：</p>
+<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line">Rx.Observable.of(<span class="number">0</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">3</span>, <span class="number">3</span>, <span class="number">4</span>).delay(<span class="number">500</span>)</span><br></pre></td></tr></table></figure>
+<p><img src="./distinct和distinctUntilChanged.png" alt="distinct和distinctUntilChanged结果比较"></p>
+<h3 id="ignoreElements、elementAt、single"><a href="#ignoreElements、elementAt、single" class="headerlink" title="ignoreElements、elementAt、single"></a>ignoreElements、elementAt、single</h3><p><code>ignoreElements</code>会忽略所有数据，只关注 complete 和 error 事件。</p>
+<p><code>elementAt</code>只返回指定下标的数据。</p>
+<p><code>single</code>会检查上游是否只有一个满足对应条件的数据。</p>
+<h2 id="转化操作符"><a href="#转化操作符" class="headerlink" title="转化操作符"></a>转化操作符</h2><p>转化操作符会对数据进行处理，但转化操作符不会对数据进行过滤，会对数据进行转化和组合。</p>
 <h3 id="map、mapTo、pluck"><a href="#map、mapTo、pluck" class="headerlink" title="map、mapTo、pluck"></a>map、mapTo、pluck</h3><p><code>map</code>是最简单、最常用的转化操作符。<code>map</code>会对上游数据进行函数处理，并把返回结果传给下游流。</p>
 <p><code>mapTo</code>会把所有数据映射成同一个数据，并传给下游。</p>
 <p><code>pluck</code>类似根据传入参数 key 来取上游数据中对应 key 的值，并传给下游。<code>plunk</code>只能去一个值，而不能嵌套取值。当对应 key 不存在时，<code>pluck</code>可以把传入的第二个参数作为默认值（默认为 undefined）传给下游。</p>
-<h3 id="缓存数组类和缓存-Observable-类"><a href="#缓存数组类和缓存-Observable-类" class="headerlink" title="缓存数组类和缓存 Observable 类"></a>缓存数组类和缓存 Observable 类</h3><p>和控制类操作符实现的有损回压控制不同，转化类操作符不会舍弃上游的数据。它会通过将多个数据放在一个数组和 Observable 对象并且一次性传给下游，从而实现<strong>无损</strong>的回压控制。因此可以把这类操作符分为缓存数组类和缓存 Observable 类，两者的区别只在于传给下游流的数据形式。</p>
+<h3 id="缓存数组类和缓存-Observable-类"><a href="#缓存数组类和缓存-Observable-类" class="headerlink" title="缓存数组类和缓存 Observable 类"></a>缓存数组类和缓存 Observable 类</h3><p>和控制操作符实现的有损回压控制不同，转化操作符不会舍弃上游的数据。它会通过将多个数据放在一个数组和 Observable 对象并且一次性传给下游，从而实现<strong>无损</strong>的回压控制。因此可以把这类操作符分为缓存数组类和缓存 Observable 类，两者的区别只在于传给下游流的数据形式。</p>
 <ul>
 <li>缓存数组类 bufferTime、bufferCount、bufferWhen、bufferToggle、buffer</li>
 <li>缓存 Observable 类 windowTime、windowCount、windowWhen、windowToggle、window</li>
@@ -419,24 +439,38 @@ height:35vh;
 <blockquote>
 <p><code>bufferWhen</code>和<code>windowWhen</code>没有其他参数。</p>
 </blockquote>
-<h4 id="bufferToggle-和-windowToggle"><a href="#bufferToggle-和-windowToggle" class="headerlink" title="bufferToggle 和 windowToggle"></a>bufferToggle 和 windowToggle</h4><p><code>windowToggle</code>、<code>bufferToggle</code></p>
+<h4 id="bufferToggle-和-windowToggle"><a href="#bufferToggle-和-windowToggle" class="headerlink" title="bufferToggle 和 windowToggle"></a>bufferToggle 和 windowToggle</h4><p><code>windowToggle</code>、<code>bufferToggle</code>通过一个 Observable 对象和一个函数<code>closingSelector</code>来控制缓冲窗口的开关。</p>
+<p>Observable 对象参数控制缓冲窗口的开始，而<code>closingSelector</code>函数接受 Observable 对象产生的数据，产生新的流来控制缓冲窗口的结束。</p>
+<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="keyword">let</span> s1$ = Rx.Observable.interval(<span class="number">200</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> opening$ = Rx.Observable.interval(<span class="number">400</span>)</span><br><span class="line"><span class="keyword">const</span> func = <span class="function"><span class="params">value</span> =&gt;</span> Rx.Observable.interval(value &gt; <span class="number">3</span> ? <span class="number">300</span> : <span class="number">600</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> s2$ = s1$.windowToggle(opening$, func)</span><br></pre></td></tr></table></figure>
+<p><img src="./windowToggle和bufferToggle.png" alt="windowToggle和bufferToggle"></p>
+<h4 id="buffer-和-window"><a href="#buffer-和-window" class="headerlink" title="buffer 和 window"></a>buffer 和 window</h4><p><code>buffer</code>和<code>window</code>只接受一个<code>notifer$</code>数据流，当<code>notifer$</code>产生数据时，结束前一个缓冲窗口，并且开始下一个缓冲窗口。</p>
+<blockquote>
+<p><code>notifer$</code>完结时，会导致操作符产生的内部流和外部的高阶流都完结。</p>
+</blockquote>
+<h3 id="高阶-map-操作符"><a href="#高阶-map-操作符" class="headerlink" title="高阶 map 操作符"></a>高阶 map 操作符</h3><p><code>map</code>操作可以通过将每个数据映射到一个内部流，从而产生一个高阶流。高阶<code>map</code>操作符，不仅仅能产生一个高阶流，而且会对内部流进行相应的组合操作，如<code>concatMap</code>等价于<code>map</code>+<code>concatAll</code>。</p>
+<h2 id="分组操作符"><a href="#分组操作符" class="headerlink" title="分组操作符"></a>分组操作符</h2><p>分组操作符会把上游流的数据按一定的规则进行分组，产生内部流，组合成一个高阶流返回。</p>
+<h3 id="groupBy"><a href="#groupBy" class="headerlink" title="groupBy"></a>groupBy</h3><p><code>groupBy</code>会检查上游源数据的 key，并把相同 key 值的数据放在同一个内部流进行传递。<code>groupBy</code>可以将上游的数据交叉地传递给下游高阶流的内部流。这与连续传递的<code>buffer</code>和<code>window</code>不同。</p>
+<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="keyword">let</span> s1$ = Rx.Observable.interval(<span class="number">1000</span>)</span><br><span class="line"><span class="keyword">const</span> s2$ = s1$.groupBy(<span class="function"><span class="params">x</span> =&gt;</span> x % <span class="number">2</span>)</span><br></pre></td></tr></table></figure>
+<p>应用：可以通过<code>event.target.className</code>作为 key 值，实现对事件委托进行分组处理。<br><img src="./groupBy.png" alt="groupBy"></p>
+<h3 id="partition"><a href="#partition" class="headerlink" title="partition"></a>partition</h3><p><code>partition</code>会对上游流的数据进行判定，满足条件的作为一个数据流，不满足的作为另外一个数据流，返回包含这两个流的数组。</p>
+<h2 id="累计操作符"><a href="#累计操作符" class="headerlink" title="累计操作符"></a>累计操作符</h2><h3 id="scan"><a href="#scan" class="headerlink" title="scan"></a>scan</h3><p><code>scan</code>操作符和<code>reduce</code>类似，不过<code>scan</code>会在对上游流的每一个数据的累计计算都返回结果。而<code>reduce</code>只有在上游流完结时，才会把累计的<strong>最终</strong>结果返回。</p>
+<p>应用：<code>scan</code>可以保存应用的状态，并根据数据流更新这些状态。</p>
+<h3 id="mergeScan"><a href="#mergeScan" class="headerlink" title="mergeScan"></a>mergeScan</h3><p><code>mergeScan</code>的规约函数会返回一个 Observable 对象，<code>mergeScan</code>会记住 Observable 对象传给下游的最后一个数据，并把它作为 accumution 参数传给规约函数。</p>
+<blockquote>
+<p><code>mergeScan</code>返回的 Observable 对象最好只包括一个数据，不然难以确定最后一个数据具体是什么。</p>
+</blockquote>
 
     </article>
     <!-- 前后页  -->
     <ul class="post-paginator">
         <li class="next">
             
-                <div class="nextSlogan">Next Post</div>
-                <a href= "/2018/06/08/rxjs笔记之Subject/" title= rxjs笔记之Subject >
-                    <div class="nextTitle">rxjs笔记之Subject</div>
-                </a>
-            
         </li>
         <li class="previous">
             
                 <div class="prevSlogan">Previous Post</div>
-                <a href= "/2018/05/24/Node-js笔记之Stream/" title= Node.js笔记之Stream >
-                    <div class="prevTitle">Node.js笔记之Stream</div>
+                <a href= "/2018/06/12/rxjs笔记之Subject/" title= rxjs笔记之Subject >
+                    <div class="prevTitle">rxjs笔记之Subject</div>
                 </a>
             
         </li>
@@ -530,7 +564,7 @@ top:35vh;
         <div class="toc-catalog">
             <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
         </div>
-        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#高阶-Observable-操作符"><span class="toc-number">1.</span> <span class="toc-text">高阶 Observable 操作符</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#合并类"><span class="toc-number">1.1.</span> <span class="toc-text">合并类</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#concatAll"><span class="toc-number">1.1.1.</span> <span class="toc-text">concatAll</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#mergeAll"><span class="toc-number">1.1.2.</span> <span class="toc-text">mergeAll</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#zipAll"><span class="toc-number">1.1.3.</span> <span class="toc-text">zipAll</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#combineAll"><span class="toc-number">1.1.4.</span> <span class="toc-text">combineAll</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#处理类"><span class="toc-number">1.2.</span> <span class="toc-text">处理类</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#switch"><span class="toc-number">1.2.1.</span> <span class="toc-text">switch</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#exhaust"><span class="toc-number">1.2.2.</span> <span class="toc-text">exhaust</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#过滤操作符"><span class="toc-number">2.</span> <span class="toc-text">过滤操作符</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#filter"><span class="toc-number">2.1.</span> <span class="toc-text">filter</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#first"><span class="toc-number">2.2.</span> <span class="toc-text">first</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#last"><span class="toc-number">2.3.</span> <span class="toc-text">last</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#take、tabkeLast、takeWhile-和-takeUntil"><span class="toc-number">2.4.</span> <span class="toc-text">take、tabkeLast、takeWhile 和 takeUntil</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#skip、skipWhile-和-skipUntil"><span class="toc-number">2.5.</span> <span class="toc-text">skip、skipWhile 和 skipUntil</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#控制类操作符"><span class="toc-number">3.</span> <span class="toc-text">控制类操作符</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#throttle、throtlleTime"><span class="toc-number">3.1.</span> <span class="toc-text">throttle、throtlleTime</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#debounce、debounceTime"><span class="toc-number">3.2.</span> <span class="toc-text">debounce、debounceTime</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#audit、auditTime"><span class="toc-number">3.3.</span> <span class="toc-text">audit、auditTime</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#sample、sampleTime"><span class="toc-number">3.4.</span> <span class="toc-text">sample、sampleTime</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#转化类操作符"><span class="toc-number">4.</span> <span class="toc-text">转化类操作符</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#map、mapTo、pluck"><span class="toc-number">4.1.</span> <span class="toc-text">map、mapTo、pluck</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#缓存数组类和缓存-Observable-类"><span class="toc-number">4.2.</span> <span class="toc-text">缓存数组类和缓存 Observable 类</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#bufferTime-和-windowTime"><span class="toc-number">4.2.1.</span> <span class="toc-text">bufferTime 和 windowTime</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#bufferCount-和-windowCount"><span class="toc-number">4.2.2.</span> <span class="toc-text">bufferCount 和 windowCount</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#bufferWhen-和-windowWhen"><span class="toc-number">4.2.3.</span> <span class="toc-text">bufferWhen 和 windowWhen</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#bufferToggle-和-windowToggle"><span class="toc-number">4.2.4.</span> <span class="toc-text">bufferToggle 和 windowToggle</span></a></li></ol></li></ol></li></ol>
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#高阶-Observable-操作符"><span class="toc-number">1.</span> <span class="toc-text">高阶 Observable 操作符</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#合并类"><span class="toc-number">1.1.</span> <span class="toc-text">合并类</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#concatAll"><span class="toc-number">1.1.1.</span> <span class="toc-text">concatAll</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#mergeAll"><span class="toc-number">1.1.2.</span> <span class="toc-text">mergeAll</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#zipAll"><span class="toc-number">1.1.3.</span> <span class="toc-text">zipAll</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#combineAll"><span class="toc-number">1.1.4.</span> <span class="toc-text">combineAll</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#处理类"><span class="toc-number">1.2.</span> <span class="toc-text">处理类</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#switch"><span class="toc-number">1.2.1.</span> <span class="toc-text">switch</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#exhaust"><span class="toc-number">1.2.2.</span> <span class="toc-text">exhaust</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#过滤操作符"><span class="toc-number">2.</span> <span class="toc-text">过滤操作符</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#filter"><span class="toc-number">2.1.</span> <span class="toc-text">filter</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#first"><span class="toc-number">2.2.</span> <span class="toc-text">first</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#last"><span class="toc-number">2.3.</span> <span class="toc-text">last</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#take、tabkeLast、takeWhile-和-takeUntil"><span class="toc-number">2.4.</span> <span class="toc-text">take、tabkeLast、takeWhile 和 takeUntil</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#skip、skipWhile-和-skipUntil"><span class="toc-number">2.5.</span> <span class="toc-text">skip、skipWhile 和 skipUntil</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#控制操作符"><span class="toc-number">3.</span> <span class="toc-text">控制操作符</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#throtlleTime、debounceTime、auditTime"><span class="toc-number">3.1.</span> <span class="toc-text">throtlleTime、debounceTime、auditTime</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#throttle、debounce、audit"><span class="toc-number">3.2.</span> <span class="toc-text">throttle、debounce、audit</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#sample、sampleTime"><span class="toc-number">3.3.</span> <span class="toc-text">sample、sampleTime</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#distinct"><span class="toc-number">3.4.</span> <span class="toc-text">distinct</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#distinctUntilChanged"><span class="toc-number">3.5.</span> <span class="toc-text">distinctUntilChanged</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ignoreElements、elementAt、single"><span class="toc-number">3.6.</span> <span class="toc-text">ignoreElements、elementAt、single</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#转化操作符"><span class="toc-number">4.</span> <span class="toc-text">转化操作符</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#map、mapTo、pluck"><span class="toc-number">4.1.</span> <span class="toc-text">map、mapTo、pluck</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#缓存数组类和缓存-Observable-类"><span class="toc-number">4.2.</span> <span class="toc-text">缓存数组类和缓存 Observable 类</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#bufferTime-和-windowTime"><span class="toc-number">4.2.1.</span> <span class="toc-text">bufferTime 和 windowTime</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#bufferCount-和-windowCount"><span class="toc-number">4.2.2.</span> <span class="toc-text">bufferCount 和 windowCount</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#bufferWhen-和-windowWhen"><span class="toc-number">4.2.3.</span> <span class="toc-text">bufferWhen 和 windowWhen</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#bufferToggle-和-windowToggle"><span class="toc-number">4.2.4.</span> <span class="toc-text">bufferToggle 和 windowToggle</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#buffer-和-window"><span class="toc-number">4.2.5.</span> <span class="toc-text">buffer 和 window</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#高阶-map-操作符"><span class="toc-number">4.3.</span> <span class="toc-text">高阶 map 操作符</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#分组操作符"><span class="toc-number">5.</span> <span class="toc-text">分组操作符</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#groupBy"><span class="toc-number">5.1.</span> <span class="toc-text">groupBy</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#partition"><span class="toc-number">5.2.</span> <span class="toc-text">partition</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#累计操作符"><span class="toc-number">6.</span> <span class="toc-text">累计操作符</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#scan"><span class="toc-number">6.1.</span> <span class="toc-text">scan</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#mergeScan"><span class="toc-number">6.2.</span> <span class="toc-text">mergeScan</span></a></li></ol></li></ol>
     </div>
     
     <div class="back-top iconfont-archer">&#xe639;</div>
@@ -594,53 +628,24 @@ top:35vh;
     
     
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    <div class="total-archive"> Total : 7 </div>
+    <div class="total-archive"> Total : 5 </div>
     
     <div class="post-archive">
     
     
     
     
-    <div class="archive-year"> Invalid date </div>
-    <ul class="year-list">
-    
-    
-        <li class="archive-post-item">
-            <span class="archive-post-date">Invalid date</span><a class="archive-post-title" href= "/2018/06/08/rxjs笔记之Subject/" >rxjs笔记之Subject</a>
-        </li>
-    
-    
-    
-    
-    
-        </ul>
-    
     <div class="archive-year"> 2018 </div>
     <ul class="year-list">
     
     
         <li class="archive-post-item">
-            <span class="archive-post-date">06/04</span><a class="archive-post-title" href= "/2018/06/04/rxjs笔记之操作符/" >rxjs笔记之操作符</a>
+            <span class="archive-post-date">06/14</span><a class="archive-post-title" href= "/2018/06/14/rxjs笔记之操作符/" >rxjs笔记之操作符</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/12</span><a class="archive-post-title" href= "/2018/06/12/rxjs笔记之Subject/" >rxjs笔记之Subject</a>
         </li>
     
     
@@ -651,16 +656,6 @@ top:35vh;
     
         <li class="archive-post-item">
             <span class="archive-post-date">05/21</span><a class="archive-post-title" href= "/2018/05/21/Node-js笔记之cluster/" >Node.js笔记之cluster</a>
-        </li>
-    
-    
-        <li class="archive-post-item">
-            <span class="archive-post-date">05/08</span><a class="archive-post-title" href= "/2018/05/08/新战神—传承与新生/" >新战神—传承与新生</a>
-        </li>
-    
-    
-        <li class="archive-post-item">
-            <span class="archive-post-date">04/22</span><a class="archive-post-title" href= "/2018/04/22/Node-js笔记之fs/" >Node.js笔记之fs</a>
         </li>
     
     
@@ -677,13 +672,13 @@ top:35vh;
     
         <span class="sidebar-tag-name" data-tags="node"><span class="iconfont-archer">&#xe606;</span>node</span>
     
-        <span class="sidebar-tag-name" data-tags="rxjs"><span class="iconfont-archer">&#xe606;</span>rxjs</span>
-    
         <span class="sidebar-tag-name" data-tags="游戏"><span class="iconfont-archer">&#xe606;</span>游戏</span>
     
         <span class="sidebar-tag-name" data-tags="PS4"><span class="iconfont-archer">&#xe606;</span>PS4</span>
     
         <span class="sidebar-tag-name" data-tags="战神"><span class="iconfont-archer">&#xe606;</span>战神</span>
+    
+        <span class="sidebar-tag-name" data-tags="rxjs"><span class="iconfont-archer">&#xe606;</span>rxjs</span>
     
     </div>
     <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>

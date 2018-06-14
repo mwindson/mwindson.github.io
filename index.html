@@ -315,21 +315,21 @@ height:35vh;
     
     
         <article class="index-post">
-            <a class="abstract-title" href = "/2018/06/08/rxjs笔记之Subject/" >
+            <a class="abstract-title" href = "/2018/06/14/rxjs笔记之操作符/" >
                 
-                    <span>rxjs笔记之Subject</span>
+                    <span>rxjs笔记之操作符</span>
             </a>
             <div class="abstract-content">
-                Subjecthot 流和 cold 流rxjs中创建的数据流分为 hot 流和 cold 流。当 Observer 订阅数据流时，cold 流会从数据流的起始时间点吐出数据，而 hot 流会从订阅的时间点开始吐出数据。
-cold 流实现的是单播，hot 流实现的是多播。
-cold 流由interval、range、of等操作符创建。
-hot 流的创建操作符包括fromPromise、fromEvent、fromEventPattern。这些操作符数据来源于外部，如 Promise 或 Dom 事件。
-cold 流的数据在没有订阅者的情况下，数据都不会产生。可以认为，每个订阅者订阅的 c...
+                高阶 Observable 操作符合并类高阶 Observable 的合并类操作符在 Observable 对象的操作符后面加上了 All，包括concatAll、mergeAll、zipAll、combineAll（combineLatestAll）。
+
+高阶 Observable 操作符没有withLatestFromAll，因为高阶合并操作符认为内部 Observable 对象是平等的。而withLatestFrom会由输入 Observable 对象控制数据输出节奏，Observable 对象并不平等。
+
+concatAllconcatAll的作用与concat类似，不过conc...
             </div>
             <div class="abstract-post-meta">
                 <!-- date  -->
                 <div class="abstract-date">
-                    <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2018/06/08</span>
+                    <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2018/06/14</span>
                 </div>
                 <!-- tags  -->
                 
@@ -347,21 +347,21 @@ cold 流的数据在没有订阅者的情况下，数据都不会产生。可以
     
     
         <article class="index-post">
-            <a class="abstract-title" href = "/2018/06/04/rxjs笔记之操作符/" >
+            <a class="abstract-title" href = "/2018/06/12/rxjs笔记之Subject/" >
                 
-                    <span>rxjs笔记之操作符</span>
+                    <span>rxjs笔记之Subject</span>
             </a>
             <div class="abstract-content">
-                高阶 Observable 操作符合并类高阶 Observable 的合并类操作符在 Observable 对象的操作符后面加上了 All，包括concatAll、mergeAll、zipAll、combineAll（combineLatestAll）。
-
-高阶 Observable 操作符没有withLatestFromAll，因为高阶合并操作符认为内部 Observable 对象是平等的。而withLatestFrom会由输入 Observable 对象控制数据输出节奏，Observable 对象并不平等。
-
-concatAllconcatAll的作用与concat类似，不过conc...
+                Subjecthot 流和 cold 流rxjs中创建的数据流分为 hot 流和 cold 流。当 Observer 订阅数据流时，cold 流会从数据流的起始时间点吐出数据，而 hot 流会从订阅的时间点开始吐出数据。
+cold 流实现的是单播，hot 流实现的是多播。
+cold 流由interval、range、of等操作符创建。
+hot 流的创建操作符包括fromPromise、fromEvent、fromEventPattern。这些操作符数据来源于外部，如 Promise 或 Dom 事件。
+cold 流的数据在没有订阅者的情况下，数据都不会产生。可以认为，每个订阅者订阅的 c...
             </div>
             <div class="abstract-post-meta">
                 <!-- date  -->
                 <div class="abstract-date">
-                    <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2018/06/04</span>
+                    <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2018/06/12</span>
                 </div>
                 <!-- tags  -->
                 
@@ -429,76 +429,6 @@ const cluster = require('cluster')const http = require('http')const numCPUs = re
                 <!-- date  -->
                 <div class="abstract-date">
                     <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2018/05/21</span>
-                </div>
-                <!-- tags  -->
-                
-                <div class= abstract-tags >
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags = "js">js</a>
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags = "node">node</a>
-    
-</div>
-                
-            </div>
-        </article>
-    
-    
-    
-        <article class="index-post">
-            <a class="abstract-title" href = "/2018/05/08/新战神—传承与新生/" >
-                
-                    <span>新战神—传承与新生</span>
-            </a>
-            <div class="abstract-content">
-                战神新作在4月20日正式发布。诸多媒体给出满分评价，以及高达94分的平均分
-这次战神
-作为索尼第一方大作，战神的画面保持了一贯的水准。
-另外，与之前的战神相比，本作的画面更加写实。虽然少了幻想史诗的宏大感觉，但能让玩家更加身临其境，仿佛这个世界的确存在。北欧众神也更贴近人的性格。
-剧情毫无疑问是本作战神着重点。这次奎爷不再是那个满腔愤怒、一心复仇的战神。他成了一个孩子的父亲，整个故事围绕着父与子展开。
-剧情中，多次
-如在游戏开头砍树的片段，奎爷曾经默不作声地系紧了手上的腕带，而直到游戏最后，奎爷将腕带解开，露出满是铁链痕迹的手腕。这说明了奎爷已经不再隐瞒过去，获得了新生。
-另外，在整个游...
-            </div>
-            <div class="abstract-post-meta">
-                <!-- date  -->
-                <div class="abstract-date">
-                    <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2018/05/08</span>
-                </div>
-                <!-- tags  -->
-                
-                <div class= abstract-tags >
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags = "游戏">游戏</a>
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags = "PS4">PS4</a>
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags = "战神">战神</a>
-    
-</div>
-                
-            </div>
-        </article>
-    
-    
-    
-        <article class="index-post">
-            <a class="abstract-title" href = "/2018/04/22/Node-js笔记之fs/" >
-                
-                    <span>Node.js笔记之fs</span>
-            </a>
-            <div class="abstract-content">
-                文件系统模块fsNode.js提供了fs模块来对文件进行操作。fs模块十分重要且常用，它使得前端能够操作文件，也是前端工程化和自动话的基础。
-fs模块的所有方法都有异步和同步的形式。异步API加上Sync字段就是同步的API名称。
-异步方法的最后一个参数都是一个回调函数。回调函数的第一个参数都会保留给异常。如果操作成功完成，则参数error会是 null 或 undefined。
-当使用同步方法时，任何异常都会被立即抛出。 可以使用 try/catch 来处理异常，或让异常向上冒泡。
-一般建议使用异步的方法，防止同步的方法阻塞整个进程。
-
-            </div>
-            <div class="abstract-post-meta">
-                <!-- date  -->
-                <div class="abstract-date">
-                    <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2018/04/22</span>
                 </div>
                 <!-- tags  -->
                 
@@ -744,53 +674,24 @@ Buffer.allocUnsafe()
     
     
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    <div class="total-archive"> Total : 7 </div>
+    <div class="total-archive"> Total : 5 </div>
     
     <div class="post-archive">
     
     
     
     
-    <div class="archive-year"> Invalid date </div>
-    <ul class="year-list">
-    
-    
-        <li class="archive-post-item">
-            <span class="archive-post-date">Invalid date</span><a class="archive-post-title" href= "/2018/06/08/rxjs笔记之Subject/" >rxjs笔记之Subject</a>
-        </li>
-    
-    
-    
-    
-    
-        </ul>
-    
     <div class="archive-year"> 2018 </div>
     <ul class="year-list">
     
     
         <li class="archive-post-item">
-            <span class="archive-post-date">06/04</span><a class="archive-post-title" href= "/2018/06/04/rxjs笔记之操作符/" >rxjs笔记之操作符</a>
+            <span class="archive-post-date">06/14</span><a class="archive-post-title" href= "/2018/06/14/rxjs笔记之操作符/" >rxjs笔记之操作符</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/12</span><a class="archive-post-title" href= "/2018/06/12/rxjs笔记之Subject/" >rxjs笔记之Subject</a>
         </li>
     
     
@@ -801,16 +702,6 @@ Buffer.allocUnsafe()
     
         <li class="archive-post-item">
             <span class="archive-post-date">05/21</span><a class="archive-post-title" href= "/2018/05/21/Node-js笔记之cluster/" >Node.js笔记之cluster</a>
-        </li>
-    
-    
-        <li class="archive-post-item">
-            <span class="archive-post-date">05/08</span><a class="archive-post-title" href= "/2018/05/08/新战神—传承与新生/" >新战神—传承与新生</a>
-        </li>
-    
-    
-        <li class="archive-post-item">
-            <span class="archive-post-date">04/22</span><a class="archive-post-title" href= "/2018/04/22/Node-js笔记之fs/" >Node.js笔记之fs</a>
         </li>
     
     
@@ -827,13 +718,13 @@ Buffer.allocUnsafe()
     
         <span class="sidebar-tag-name" data-tags="node"><span class="iconfont-archer">&#xe606;</span>node</span>
     
-        <span class="sidebar-tag-name" data-tags="rxjs"><span class="iconfont-archer">&#xe606;</span>rxjs</span>
-    
         <span class="sidebar-tag-name" data-tags="游戏"><span class="iconfont-archer">&#xe606;</span>游戏</span>
     
         <span class="sidebar-tag-name" data-tags="PS4"><span class="iconfont-archer">&#xe606;</span>PS4</span>
     
         <span class="sidebar-tag-name" data-tags="战神"><span class="iconfont-archer">&#xe606;</span>战神</span>
+    
+        <span class="sidebar-tag-name" data-tags="rxjs"><span class="iconfont-archer">&#xe606;</span>rxjs</span>
     
     </div>
     <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>
